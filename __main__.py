@@ -56,5 +56,5 @@ def update(m):
     m.current_level += 1
     __update_level_file(m.current_level)
 
-# Start the game
+# Start the game\
 Game(__LEVELS, update).start()

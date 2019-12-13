@@ -1,7 +1,8 @@
 from level import Level
-from platform import Platform
+from game_platform import Platform
 from ending import Ending
 from enemy import Enemy
+from movable_object import Movable_Object
 import pygame
 
 '''
@@ -22,12 +23,19 @@ class Level1(Level):
         # Make the level
         self.player_start = [100, 300]
         self.add_platform(Platform([0, 500], 700, 25, BLACK, screen))
-        self.add_platform(Platform([600, 400], 100, 100, BLACK, screen))
+        self.add_platform(Platform([600, 400], 100, 225, BLACK, screen))
+        self.add_platform(Platform([700, 500], 100, 125, BLACK, screen))
         self.add_platform(Platform([800, 600], 500, 25, BLACK, screen))
         self.add_platform(Platform([1300, 500], 500, 25, BLACK, screen))
-        self.add_platform(Platform([1400, 200], 500, 25, BLACK, screen))
-        self.ending = self.set_ending(Ending([2000, 300], screen))
+        self.add_platform(Platform([1900, 400], 300, 25, BLACK, screen))
+        self.add_platform(Platform([1821, 200], 100, 25, BLACK, screen))
+        self.add_platform(Platform([1800, -100], 400, 25, BLACK, screen))
+        self.add_platform(Platform([1300, 0], 300, 25, BLACK, screen))
+        self.ending = self.set_ending(Ending([2000, -300], screen))
         self.calc_max_values()
+
+        # Add objects
+        self.add_object(Movable_Object([200, 100]))
 
         # Add enemies
         self.enemies.add(Enemy([500, 300], screen))

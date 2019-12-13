@@ -10,6 +10,7 @@ class Level(object):
         self.level_group = pygame.sprite.Group()
         self.ending_group = pygame.sprite.Group()
         self.enemies = pygame.sprite.Group()
+        self.objects = pygame.sprite.Group()
         self.screen = screen
 
         self.least_x = 0
@@ -19,6 +20,9 @@ class Level(object):
 
     def add_platform(self, platform):
         self.level_group.add(platform)
+
+    def add_object(self, object):
+        self.objects.add(object)
 
     def set_ending(self, ending):
         self.ending = ending
@@ -57,4 +61,5 @@ class Level(object):
     def draw(self):
         self.level_group.draw(self.screen)
         self.ending_group.draw(self.screen)
+        self.objects.draw(self.screen)
         self.enemies.draw(self.screen)

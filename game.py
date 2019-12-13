@@ -2,7 +2,7 @@
 import pygame
 import sys
 from player import Player
-from platform import Platform
+from game_platform import Platform
 from cloud import Cloud
 import __main__ as m
 from itertools import islice
@@ -33,6 +33,8 @@ class Game:
         clock = pygame.time.Clock()
         screen_x, screen_y = pygame.display.get_surface().get_size()
         self.SCREEN_SIZE = [screen_x, screen_y]
+        pygame.mixer.music.load('CubeMusic.wav')
+        pygame.mixer.music.play(-1)
 
         # Loops through all levels
         for unInitializedLevel in islice(self.levels, m.current_level, None):
@@ -80,6 +82,13 @@ class Game:
                     elif keys[pygame.K_a] and not keys[pygame.K_d]:
                         player.rect.left = collision.rect.right
 
+                # Move blocks
+                for collision in pygame.sprite.spritecollide(player, level.objects, False):
+                    if keys[pygame.K_d] and not keys[pygame.K_a]:
+                        collision.delta = -player.speed
+                    elif keys[pygame.K_a] and not keys[pygame.K_d]:
+                        collision.delta = player.speed
+
                 # Bound to walls
                 if player.rect.left < horizontal_constraints[0]:
                     player.rect.left = horizontal_constraints[0]
@@ -96,7 +105,7 @@ class Game:
                 player.vertical_acceleration += self.GRAVITY
                 player.rect.y += player.vertical_acceleration
 
-                collisions = pygame.sprite.spritecollide(player, level.level_group, False)
+                collisions = pygame.sprite.spritecollide(player, level.level_group, False) + pygame.sprite.spritecollide(player, level.objects, False)
 
                 # Loop through all vertical collisions
                 for collision in collisions:
@@ -164,6 +173,36 @@ class Game:
                     player.kill
                     self.stop()
 
+                # Handle objects
+                for object in level.objects:
+
+                    # Move horizontally
+                    object.prev_x = object.rect.x
+                    object.rect.x += object.delta
+                    for collision in pygame.sprite.spritecollide(object, level.level_group, False):
+                        if object.prev_x < object.rect.x:
+                            object.rect.right = collision.rect.left
+                        elif object.prev_x > object.rect.x:
+                            object.rect.left = collision.rect.right
+
+                    # Bound to walls
+                    if object.rect.left < horizontal_constraints[0]:
+                        object.rect.left = horizontal_constraints[0]
+                    if object.rect.right > horizontal_constraints[1]:
+                        object.rect.right = horizontal_constraints[1]
+
+                    object.delta = 0
+
+                    # Gravity
+                    object.prev_y = object.rect.y
+                    for collision in pygame.sprite.spritecollide(object, level.level_group, False):
+                        if object.prev_y < collision.rect.top:
+                            object.rect.bottom = collision.rect.top
+                        else:
+                            object.rect.top = collision.rect.bottom
+                        object.vertical_acceleration = 0
+
+
                 offset_x = 0
                 offset_y = 0
 
@@ -197,6 +236,9 @@ class Game:
                 for enemy in level.enemies:
                     enemy.rect.x += offset_x
                     enemy.rect.y += offset_y
+                for object in level.objects:
+                    object.rect.x += offset_x
+                    object.rect.y += offset_y
 
                 # Check if level passed
                 level.update()
@@ -222,7 +264,7 @@ class Game:
                 player_group.draw(screen)
 
                 # Draw health bar
-                health_bar_size = 50
+                health_bar_size = 20
                 health_bar_multiplier = 5
                 health_bar_x = (screen_x / 2) - (health_bar_multiplier * 100)
                 health_bar_y = screen_y - health_bar_size
