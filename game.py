@@ -82,12 +82,16 @@ class Game:
                     elif keys[pygame.K_a] and not keys[pygame.K_d]:
                         player.rect.left = collision.rect.right
 
+                print horizontal_constraints
+
                 # Move blocks
                 for collision in pygame.sprite.spritecollide(player, level.objects, False):
                     if keys[pygame.K_d] and not keys[pygame.K_a]:
-                        collision.delta = -player.speed
-                    elif keys[pygame.K_a] and not keys[pygame.K_d]:
                         collision.delta = player.speed
+                        player.rect.right = collision.rect.left
+                    elif keys[pygame.K_a] and not keys[pygame.K_d]:
+                        collision.delta = -player.speed
+                        player.rect.left = collision.rect.right
 
                 # Bound to walls
                 if player.rect.left < horizontal_constraints[0]:
@@ -195,11 +199,17 @@ class Game:
 
                     # Gravity
                     object.prev_y = object.rect.y
+                    object.vertical_acceleration += self.GRAVITY
+                    object.rect.y += object.vertical_acceleration
                     for collision in pygame.sprite.spritecollide(object, level.level_group, False):
                         if object.prev_y < collision.rect.top:
                             object.rect.bottom = collision.rect.top
                         else:
                             object.rect.top = collision.rect.bottom
+                        object.vertical_acceleration = 0
+                    for collision in pygame.sprite.spritecollide(object, player_group, False):
+                        if object.prev_y < collision.rect.x:
+                            object.rect.bottom = collision.rect.top
                         object.vertical_acceleration = 0
 
 

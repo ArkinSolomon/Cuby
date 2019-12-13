@@ -38,8 +38,8 @@ class Level1(Level):
         self.add_object(Movable_Object([200, 100]))
 
         # Add enemies
-        self.enemies.add(Enemy([500, 300], screen))
-        self.enemies.add(Enemy([800, 300], screen))
+        # self.enemies.add(Enemy([500, 300], screen))
+        # self.enemies.add(Enemy([800, 300], screen))
 
 # Level 2
 class Level2(Level):
