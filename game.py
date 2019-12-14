@@ -82,16 +82,14 @@ class Game:
                     elif keys[pygame.K_a] and not keys[pygame.K_d]:
                         player.rect.left = collision.rect.right
 
-                print horizontal_constraints
-
                 # Move blocks
                 for collision in pygame.sprite.spritecollide(player, level.objects, False):
                     if keys[pygame.K_d] and not keys[pygame.K_a]:
-                        collision.delta = player.speed
                         player.rect.right = collision.rect.left
+                        collision.delta = player.speed
                     elif keys[pygame.K_a] and not keys[pygame.K_d]:
-                        collision.delta = -player.speed
                         player.rect.left = collision.rect.right
+                        collision.delta = -player.speed
 
                 # Bound to walls
                 if player.rect.left < horizontal_constraints[0]:
@@ -148,7 +146,7 @@ class Game:
                         enemy.image = pygame.image.load('enemy.png')
                     elif enemy.prev_x > enemy.rect.x:
                         enemy.image = pygame.image.load('enemy_reversed.png')
-                    collisions = pygame.sprite.spritecollide(enemy, level.level_group, False)
+                    collisions = pygame.sprite.spritecollide(enemy, level.level_group, False) + pygame.sprite.spritecollide(enemy, level.objects, False)
                     if len(collisions) != 0: enemy.jump()
                     for collision in collisions:
                         if enemy.prev_x < enemy.rect.x:
@@ -208,10 +206,9 @@ class Game:
                             object.rect.top = collision.rect.bottom
                         object.vertical_acceleration = 0
                     for collision in pygame.sprite.spritecollide(object, player_group, False):
-                        if object.prev_y < collision.rect.x:
+                        if object.prev_y < collision.rect.top:
                             object.rect.bottom = collision.rect.top
-                        object.vertical_acceleration = 0
-
+                            object.vertical_acceleration = 0
 
                 offset_x = 0
                 offset_y = 0

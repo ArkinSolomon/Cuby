@@ -23,7 +23,7 @@ class Level1(Level):
         # Make the level
         self.player_start = [100, 300]
         self.add_platform(Platform([0, 500], 700, 25, BLACK, screen))
-        self.add_platform(Platform([600, 400], 100, 225, BLACK, screen))
+        self.add_platform(Platform([500, 300], 100, 225, BLACK, screen))
         self.add_platform(Platform([700, 500], 100, 125, BLACK, screen))
         self.add_platform(Platform([800, 600], 500, 25, BLACK, screen))
         self.add_platform(Platform([1300, 500], 500, 25, BLACK, screen))
@@ -38,8 +38,8 @@ class Level1(Level):
         self.add_object(Movable_Object([200, 100]))
 
         # Add enemies
-        # self.enemies.add(Enemy([500, 300], screen))
-        # self.enemies.add(Enemy([800, 300], screen))
+        self.enemies.add(Enemy([500, 300], screen))
+        self.enemies.add(Enemy([800, 300], screen))
 
 # Level 2
 class Level2(Level):
