@@ -13,13 +13,17 @@ This Class is the game itself. All of the different game classes come together h
 class Game:
 
     # Class initializer
-    def __init__(self, levels, update):
+    def __init__(self, levels, update, verbose):
         self.levels = levels
         self.update = update
+        self.VERBOSE = verbose
 
         # Constants
         self.GRAVITY = .19
         self.FPS = 800 # I don't know about this number but it's good
+        self.PARALAX_RATIO = 3
+
+        if self.VERBOSE: print 'Game initialized'
 
         # Initialize game
         pygame.init()
@@ -36,6 +40,8 @@ class Game:
         pygame.mixer.music.load('CubeMusic.wav')
         pygame.mixer.music.play(-1)
 
+        if self.VERBOSE: print 'Display initialized'
+
         # Loops through all levels
         for unInitializedLevel in islice(self.levels, m.current_level, None):
 
@@ -48,11 +54,13 @@ class Game:
             player_group = pygame.sprite.Group()
             player_group.add(player)
             self.game_is_running = True
+            if self.VERBOSE: print 'Level initialized'
 
             # Make clouds
-            clouds = Cloud(screen, self.SCREEN_SIZE[0], self.SCREEN_SIZE[1]).clouds
+            clouds = Cloud(screen, self.SCREEN_SIZE[0], self.SCREEN_SIZE[1], horizontal_constraints, vertical_constraints, self.VERBOSE).clouds
 
             # Main game loop
+            if self.VERBOSE: print 'Initializing main game loop'
             while self.game_is_running:
 
                 # Handle events
@@ -146,7 +154,9 @@ class Game:
                         enemy.image = pygame.image.load('enemy.png')
                     elif enemy.prev_x > enemy.rect.x:
                         enemy.image = pygame.image.load('enemy_reversed.png')
-                    collisions = pygame.sprite.spritecollide(enemy, level.level_group, False) + pygame.sprite.spritecollide(enemy, level.objects, False)
+                    eCopy = level.enemies.copy()
+                    eCopy.remove(enemy)
+                    collisions = pygame.sprite.spritecollide(enemy, level.level_group, False) + pygame.sprite.spritecollide(enemy, level.objects, False) + pygame.sprite.spritecollide(enemy, eCopy, False)
                     if len(collisions) != 0: enemy.jump()
                     for collision in collisions:
                         if enemy.prev_x < enemy.rect.x:
@@ -156,7 +166,7 @@ class Game:
                     enemy.prev_y = enemy.rect.y
                     enemy.vertical_acceleration += self.GRAVITY
                     enemy.rect.y += enemy.vertical_acceleration
-                    for collision in pygame.sprite.spritecollide(enemy, level.level_group, False):
+                    for collision in pygame.sprite.spritecollide(enemy, level.level_group, False) + pygame.sprite.spritecollide(enemy, level.objects, False):
                         if enemy.prev_y < collision.rect.top:
                             enemy.rect.bottom = collision.rect.top
                             enemy.is_in_air = False
@@ -236,6 +246,10 @@ class Game:
                     vertical_constraints[1] += offset_y
                     level.ending.rect.y += offset_y
 
+                for cloud in clouds:
+                    cloud.rect.x += offset_x / self.PARALAX_RATIO
+                    cloud.rect.y += offset_y / self.PARALAX_RATIO
+
                 # Loop through all of the level's sprites
                 for platform_sprite in level.level_group:
                     platform_sprite.rect.x += offset_x
@@ -288,6 +302,7 @@ class Game:
 
     # Stop the game
     def stop(self):
+        if self.VERBOSE: print 'Halt signal recieved, game closing'
         self.game_is_running = False
         pygame.quit()
         sys.exit(0)

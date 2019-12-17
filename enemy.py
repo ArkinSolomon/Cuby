@@ -6,7 +6,7 @@ class Enemy(pygame.sprite.Sprite):
         super(Enemy, self).__init__()
 
         self.pos = starting_position
-        self.speed = 5
+        self.speed = 3.6
         self.vertical_acceleration = 0
         self.prev_x = starting_position[0]
         self.prev_y = starting_position[1]
