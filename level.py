@@ -7,11 +7,15 @@ class Level(object):
 
     def __init__(self, screen):
         super(Level, self).__init__()
+
         self.level_group = pygame.sprite.Group()
         self.ending_group = pygame.sprite.Group()
         self.enemies = pygame.sprite.Group()
         self.objects = pygame.sprite.Group()
         self.screen = screen
+        self.render = True
+
+        self.screen_x, self.screen_y = pygame.display.get_surface().get_size()
 
         self.least_x = 0
         self.greatest_x = 0
@@ -58,8 +62,30 @@ class Level(object):
         if self.enemy_count <= 0:
             self.ending.unlock()
 
+    def set_clouds(self, cloud_group):
+        self.clouds = cloud_group
+
+    def stop_render(self):
+        self.render = False
+
+    def start_render(self):
+        self.render = True
+
+    def __check_draw(self, sprite_group):
+        for sprite in sprite_group:
+            if self.render:
+                if (sprite.rect.right >= 0 and sprite.rect.right <= self.screen_x) or (sprite.rect.left >= 0 and sprite.rect.left <= self.screen_x) or (sprite.rect.top >= 0 and sprite.rect.top <= self.screen_y) or (sprite.rect.bottom >= 0 and sprite.rect.bottom <= self.screen_y):
+                    self.screen.blit(sprite.image, sprite.rect)
+                    sprite.drawn = True
+                else:
+                    sprite.drawn = False
+            else:
+                if sprite.drawn:
+                    self.screen.blit(sprite.image, sprite.rect)
+
     def draw(self):
-        self.level_group.draw(self.screen)
-        self.ending_group.draw(self.screen)
-        self.objects.draw(self.screen)
-        self.enemies.draw(self.screen)
+        self.__check_draw(self.clouds)
+        self.__check_draw(self.level_group)
+        self.__check_draw(self.ending_group)
+        self.__check_draw(self.objects)
+        self.__check_draw(self.enemies)

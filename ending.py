@@ -13,6 +13,7 @@ class Ending(pygame.sprite.Sprite):
         self.color = pygame.Color('red')
         self.locked = True
         self.screen = screen
+        self.drawn = False
 
         # Initialize platform
         self.image = pygame.Surface(self.size)

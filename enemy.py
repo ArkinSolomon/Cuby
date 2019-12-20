@@ -12,6 +12,7 @@ class Enemy(pygame.sprite.Sprite):
         self.prev_y = starting_position[1]
         self.is_in_air = False
         self.jump_power = 8
+        self.drawn = False
 
         # Initialize sprite
         self.image = pygame.Surface((75, 75), pygame.SRCALPHA)

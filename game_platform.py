@@ -14,6 +14,7 @@ class Platform(pygame.sprite.Sprite):
         self.height = height
         self.color = color
         self.screen = screen
+        self.drawn = False
 
         # Initialize platform
         self.image = pygame.Surface([self.width, self.height])

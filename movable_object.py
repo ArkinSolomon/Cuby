@@ -10,6 +10,7 @@ class Movable_Object(pygame.sprite.Sprite):
         self.prev_x = starting_position[0]
         self.prev_y = starting_position[1]
         self.delta = 0
+        self.drawn = False
 
         # Initialize sprite
         self.image = pygame.Surface((100, 100))

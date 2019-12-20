@@ -5,6 +5,8 @@ import json
 import os
 from os.path import exists, isfile, isdir
 from pathlib import Path
+import pygame
+from button import Button
 
 '''
 This file handles the game initialization as well as game saving.
@@ -12,7 +14,7 @@ This file handles the game initialization as well as game saving.
 
 os.system('clear')
 
-# Run time flags
+# Runtime flags
 VERBOSE = True if '-v' in sys.argv or '--verbose' in sys.argv else False
 if VERBOSE: print 'Running The Legend of Cube in verbose mode'
 level_override = None
@@ -21,6 +23,8 @@ if '-l' in sys.argv or '--level' in sys.argv:
         level_override = int(sys.argv[sys.argv.index('-l') + 1])
     else:
         level_override = int(sys.argv[sys.argv.index('-l') + 1])
+DEBUG = True if '-d' in sys.argv or '--debug' in sys.argv else False
+if DEBUG: print 'Debugging The Legend of Cube mode'
 
 # Update level in file
 def __update_level_file(c):
@@ -78,6 +82,50 @@ def update(m):
     m.current_level += 1
     __update_level_file(m.current_level)
 
-# Start the game
-if VERBOSE: print 'Starting game at level %d' % (current_level + 1)
-Game(__LEVELS, update, VERBOSE).start()
+# Main menu
+pygame.init()
+screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+pygame.display.set_caption('The Legend of Cube')
+pygame.mixer.music.load('CubeMusic.wav')
+pygame.mixer.music.play(-1)
+
+screen_x, screen_y = pygame.display.get_surface().get_size()
+button_width = screen_x * .33
+button_height = screen_y * .1
+
+start_button = Button([(screen_x / 2) - button_width / 2, (screen_y / 2) - button_height / 2], button_width, button_height, 'Start', 50, screen)
+quit_button = Button([90, screen_y - 190], 100, 100, 'Quit', 38, screen)
+
+main_menu_is_active = True
+
+def __quit():
+    main_menu_is_active = False
+    pygame.quit()
+    sys.exit(0)
+
+while main_menu_is_active:
+
+    for event in pygame.event.get():
+
+        # If user quits
+        if event.type == pygame.QUIT or pygame.key.get_pressed()[pygame.K_ESCAPE]:
+            __quit()
+
+    mouse_pos = pygame.mouse.get_pos()
+
+    # Buttons
+    if pygame.mouse.get_pressed()[0]:
+
+        # Start the game
+        if start_button.check_click(mouse_pos[0], mouse_pos[1]):
+            if VERBOSE: print 'Starting game at level %d' % (current_level + 1)
+            Game(__LEVELS, update, VERBOSE, DEBUG).start(screen)
+
+        if quit_button.check_click(mouse_pos[0], mouse_pos[1]):
+            if VERBOSE: print 'Game quitting'
+            __quit()
+
+    screen.fill(pygame.Color('lightblue'))
+    start_button.draw()
+    quit_button.draw()
+    pygame.display.flip()

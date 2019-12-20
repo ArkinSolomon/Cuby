@@ -13,10 +13,11 @@ This Class is the game itself. All of the different game classes come together h
 class Game:
 
     # Class initializer
-    def __init__(self, levels, update, verbose):
+    def __init__(self, levels, update, verbose, debug):
         self.levels = levels
         self.update = update
         self.VERBOSE = verbose
+        self.DEBUG = debug
 
         # Constants
         self.GRAVITY = .19
@@ -25,20 +26,13 @@ class Game:
 
         if self.VERBOSE: print 'Game initialized'
 
-        # Initialize game
-        pygame.init()
-
     # Start the game
-    def start(self):
+    def start(self, screen):
 
         # Screen setup
-        screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-        pygame.display.set_caption('The Legend of Cube')
         clock = pygame.time.Clock()
         screen_x, screen_y = pygame.display.get_surface().get_size()
         self.SCREEN_SIZE = [screen_x, screen_y]
-        pygame.mixer.music.load('CubeMusic.wav')
-        pygame.mixer.music.play(-1)
 
         if self.VERBOSE: print 'Display initialized'
 
@@ -57,7 +51,7 @@ class Game:
             if self.VERBOSE: print 'Level initialized'
 
             # Make clouds
-            clouds = Cloud(screen, self.SCREEN_SIZE[0], self.SCREEN_SIZE[1], horizontal_constraints, vertical_constraints, self.VERBOSE).clouds
+            level.set_clouds(Cloud(screen, self.SCREEN_SIZE[0], self.SCREEN_SIZE[1], horizontal_constraints, vertical_constraints, self.VERBOSE).clouds)
 
             # Main game loop
             if self.VERBOSE: print 'Initializing main game loop'
@@ -133,6 +127,12 @@ class Game:
                     player.image = pygame.image.load('player.png')
                 elif player.prev_x > player.rect.x:
                     player.image = pygame.image.load('player_reversed.png')
+
+                # Stop or start rendering
+                if keys[pygame.K_o] and self.DEBUG:
+                    level.start_render()
+                if keys[pygame.K_p] and self.DEBUG:
+                    level.stop_render()
 
                 # Move enemies
                 for enemy in level.enemies:
@@ -246,7 +246,7 @@ class Game:
                     vertical_constraints[1] += offset_y
                     level.ending.rect.y += offset_y
 
-                for cloud in clouds:
+                for cloud in level.clouds:
                     cloud.rect.x += offset_x / self.PARALAX_RATIO
                     cloud.rect.y += offset_y / self.PARALAX_RATIO
 
@@ -278,7 +278,7 @@ class Game:
                 # Draw sky
                 screen.fill(pygame.Color('lightblue'))
                 screen.blit(pygame.image.load('sun.png'), (50, 50))
-                clouds.draw(screen)
+
 
                 # Draw foreground items
                 level.draw()

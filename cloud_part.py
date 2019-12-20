@@ -9,6 +9,7 @@ class Cloud_Part(pygame.sprite.Sprite):
         super(Cloud_Part, self).__init__()
 
         self.color = pygame.Color('white')
+        self.drawn = False
 
         self.image = pygame.Surface([size, size])
         self.image.fill(self.color)
