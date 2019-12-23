@@ -1,5 +1,6 @@
 import sys
 from game import Game
+from cloud import Cloud
 import levels as l
 import json
 import os
@@ -95,6 +96,8 @@ button_height = screen_y * .1
 
 start_button = Button([(screen_x / 2) - button_width / 2, (screen_y / 2) - button_height / 2], button_width, button_height, 'Start', 50, screen)
 quit_button = Button([90, screen_y - 190], 100, 100, 'Quit', 38, screen)
+clouds = Cloud(screen, screen_x, screen_y, [-150, screen_x + 150], [-450, screen_y + 450], False).clouds
+clouds_2 = Cloud(screen, screen_x, screen_y, [-150 + screen_x, 2 * screen_x + 150], [-450, screen_y + 450], False).clouds
 
 main_menu_is_active = True
 
@@ -102,6 +105,10 @@ def __quit():
     main_menu_is_active = False
     pygame.quit()
     sys.exit(0)
+
+cloud_counter = 0
+
+clock = pygame.time.Clock()
 
 while main_menu_is_active:
 
@@ -126,6 +133,21 @@ while main_menu_is_active:
             __quit()
 
     screen.fill(pygame.Color('lightblue'))
+    screen.blit(pygame.image.load('sun.png'), (50, 50))
+
+    clouds.draw(screen)
+    clouds_2.draw(screen)
+    least_cloud = 0
+    for cloud in clouds:
+        if cloud.rect.right > least_cloud: least_cloud = cloud.rect.right
+        cloud.rect.right -= screen_x * 5e-6
+    for cloud in clouds_2: cloud.rect.right -= 5e-6
+    if least_cloud <= 0:
+        clouds = clouds_2
+        clouds_2 = Cloud(screen, screen_x, screen_y, [-150 + screen_x, 2 * screen_x + 150], [-450, screen_y + 450], False).clouds
+
     start_button.draw()
     quit_button.draw()
     pygame.display.flip()
+
+    clock.tick(800)

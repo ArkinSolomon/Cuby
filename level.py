@@ -14,8 +14,13 @@ class Level(object):
         self.objects = pygame.sprite.Group()
         self.screen = screen
         self.render = True
+        self.unlocked = False
+        self.first_loop_check = True
+
+        self.UNLOCK_SOUND = pygame.mixer.Sound('exit_unlock.wav')
 
         self.screen_x, self.screen_y = pygame.display.get_surface().get_size()
+        self.screenRect = pygame.Rect(0, 0, self.screen_x, self.screen_y)
 
         self.least_x = 0
         self.greatest_x = 0
@@ -59,22 +64,31 @@ class Level(object):
 
     def update(self):
         self.enemy_count = len(self.enemies)
-        if self.enemy_count <= 0:
+        if self.first_loop_check and self.enemy_count <= 0:
+            self.first_loop_check = False
+            return
+        if self.enemy_count <= 0 and not self.unlocked:
+            self.unlocked = True
+            self.UNLOCK_SOUND.play()
             self.ending.unlock()
 
     def set_clouds(self, cloud_group):
         self.clouds = cloud_group
 
     def stop_render(self):
+        if not self.render: return
+        print 'Stopping render'
         self.render = False
 
     def start_render(self):
+        if self.render: return
+        print 'Starting render'
         self.render = True
 
     def __check_draw(self, sprite_group):
         for sprite in sprite_group:
             if self.render:
-                if (sprite.rect.right >= 0 and sprite.rect.right <= self.screen_x) or (sprite.rect.left >= 0 and sprite.rect.left <= self.screen_x) or (sprite.rect.top >= 0 and sprite.rect.top <= self.screen_y) or (sprite.rect.bottom >= 0 and sprite.rect.bottom <= self.screen_y):
+                if self.screenRect.colliderect(sprite.rect):
                     self.screen.blit(sprite.image, sprite.rect)
                     sprite.drawn = True
                 else:

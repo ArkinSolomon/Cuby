@@ -23,7 +23,7 @@ class Cloud(object):
         for _ in range(int(math.ceil((horizontal_constraints[1] - horizontal_constraints[0]) / width))):
             curr_y = vertical_constraints[1] - height
             for _ in range(int(math.ceil((vertical_constraints[1] - vertical_constraints[0]) / height))):
-                for _ in range(randrange(5, 9, 1)):
+                for _ in range(randrange(8, 10, 1)):
                     CLOUD = POSSIBLE_CLOUDS[randrange(0, len(POSSIBLE_CLOUDS) - 1, 1)]
                     current_cloud = list(bin(CLOUD)[2:])
 

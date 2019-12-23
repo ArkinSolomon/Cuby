@@ -24,6 +24,10 @@ class Game:
         self.FPS = 800 # I don't know about this number but it's good
         self.PARALAX_RATIO = 3
 
+        # Sounds
+        self.JUMP_ENEMY = pygame.mixer.Sound('jump_enemy.wav')
+        self.JUMP = pygame.mixer.Sound('jump.wav')
+
         if self.VERBOSE: print 'Game initialized'
 
     # Start the game
@@ -101,6 +105,7 @@ class Game:
 
                 # Vertical logic
                 if (keys[pygame.K_w] or keys[pygame.K_SPACE]) and not player.is_in_air:
+                    self.JUMP.play()
                     player.vertical_acceleration -= 9
                     player.is_in_air = True
 
@@ -157,7 +162,9 @@ class Game:
                     eCopy = level.enemies.copy()
                     eCopy.remove(enemy)
                     collisions = pygame.sprite.spritecollide(enemy, level.level_group, False) + pygame.sprite.spritecollide(enemy, level.objects, False) + pygame.sprite.spritecollide(enemy, eCopy, False)
-                    if len(collisions) != 0: enemy.jump()
+                    if len(collisions) != 0 and not enemy.is_in_air:
+                        enemy.jump()
+                        self.JUMP_ENEMY.play()
                     for collision in collisions:
                         if enemy.prev_x < enemy.rect.x:
                             enemy.rect.right = collision.rect.left
