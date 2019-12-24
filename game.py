@@ -1,4 +1,3 @@
-# Import libraries
 import pygame
 import sys
 from player import Player
@@ -10,10 +9,11 @@ from itertools import islice
 '''
 This Class is the game itself. All of the different game classes come together here.
 '''
-class Game:
+class Game(object):
 
     # Class initializer
     def __init__(self, levels, update, verbose, debug):
+        super(Game, self).__init__()
         self.levels = levels
         self.update = update
         self.VERBOSE = verbose
@@ -41,13 +41,11 @@ class Game:
         if self.VERBOSE: print 'Display initialized'
 
         # Loops through all levels
-        for unInitializedLevel in islice(self.levels, m.current_level, None):
+        for level in islice(self.levels, m.current_level, None):
 
             # Initialize level
-            level = unInitializedLevel(screen)
             horizontal_constraints = [level.least_x, level.greatest_x]
             vertical_constraints = [level.least_y, level.greatest_y]
-            level.add_platform(Platform([horizontal_constraints[0], vertical_constraints[0] - 50], horizontal_constraints[1] - horizontal_constraints[0], 50, pygame.Color('purple'), screen))
             player = Player(level.player_start, screen)
             player_group = pygame.sprite.Group()
             player_group.add(player)
@@ -66,7 +64,8 @@ class Game:
 
                     # If user quits
                     if event.type == pygame.QUIT or pygame.key.get_pressed()[pygame.K_ESCAPE]:
-                        self.stop()
+                        if self.VERBOSE: print 'Gameplay stopped, returning to main menu'
+                        return
 
                 '''
                 Game logic
@@ -190,7 +189,8 @@ class Game:
                     player.health -= 1
                 if player.health <= 0:
                     player.kill
-                    self.stop()
+                    if self.VERBOSE: print 'Gameplay stopped, returning to main menu'
+                    return
 
                 # Handle objects
                 for object in level.objects:
@@ -216,7 +216,10 @@ class Game:
                     object.prev_y = object.rect.y
                     object.vertical_acceleration += self.GRAVITY
                     object.rect.y += object.vertical_acceleration
-                    for collision in pygame.sprite.spritecollide(object, level.level_group, False):
+                    g = level.level_group.copy()
+                    g.add(level.objects)
+                    g.remove(object)
+                    for collision in pygame.sprite.spritecollide(object, g, False):
                         if object.prev_y < collision.rect.top:
                             object.rect.bottom = collision.rect.top
                         else:
@@ -276,7 +279,8 @@ class Game:
 
                 # Check if player died
                 if player.rect.top > self.SCREEN_SIZE[1] + 100:
-                    self.stop()
+                    if self.VERBOSE: print 'Gameplay stopped, returning to main menu'
+                    return
 
                 '''
                 All game drawing
@@ -285,7 +289,6 @@ class Game:
                 # Draw sky
                 screen.fill(pygame.Color('lightblue'))
                 screen.blit(pygame.image.load('sun.png'), (50, 50))
-
 
                 # Draw foreground items
                 level.draw()
@@ -305,11 +308,5 @@ class Game:
                 # Set frame rate
                 clock.tick(self.FPS)
 
-        self.stop()
-
-    # Stop the game
-    def stop(self):
-        if self.VERBOSE: print 'Halt signal recieved, game closing'
-        self.game_is_running = False
-        pygame.quit()
-        sys.exit(0)
+        if self.VERBOSE: print 'Gameplay stopped, returning to main menu'
+        return

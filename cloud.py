@@ -20,10 +20,18 @@ class Cloud(object):
         # Print a random amount of clouds
         curr_x = horizontal_constraints[0]
 
-        for _ in range(int(math.ceil((horizontal_constraints[1] - horizontal_constraints[0]) / width))):
-            curr_y = vertical_constraints[1] - height
-            for _ in range(int(math.ceil((vertical_constraints[1] - vertical_constraints[0]) / height))):
-                for _ in range(randrange(8, 10, 1)):
+        if VERBOSE: print 'Creating cloud set'
+
+        x_screens = int(math.ceil((horizontal_constraints[1] - horizontal_constraints[0]) / width))
+        y_screens = int(math.ceil((vertical_constraints[1] - vertical_constraints[0]) / height))
+
+        x_screens = 2 if x_screens <= 0 else x_screens
+        y_screens = 2 if y_screens <= 1 else y_screens
+
+        for _ in range(x_screens):
+            curr_y = height if vertical_constraints[1] - vertical_constraints[0] < height else vertical_constraints[0]
+            for _ in range(y_screens):
+                for _ in range(randrange(8, 12, 1)):
                     CLOUD = POSSIBLE_CLOUDS[randrange(0, len(POSSIBLE_CLOUDS) - 1, 1)]
                     current_cloud = list(bin(CLOUD)[2:])
 
@@ -47,5 +55,5 @@ class Cloud(object):
                         if y_inc_count == 3:
                             y += self.part_size
                             x -= self.part_size * 3
-                curr_y -= height
+                curr_y += height
             curr_x += width

@@ -22,7 +22,7 @@ class Button(pygame.sprite.Sprite):
         self.rect.y = coords[1]
 
     def check_click(self, mouse_x, mouse_y):
-        return mouse_x > self.rect.left and mouse_x < self.rect.right and mouse_y > self.rect.top and mouse_y < self.rect.bottom
+        return mouse_x > self.rect.left and mouse_x < self.rect.right and mouse_y > self.rect.top and mouse_y < self.rect.bottom and pygame.mouse.get_pressed()[0]
 
     def draw(self):
         self.screen.blit(self.image, self.rect)
