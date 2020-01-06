@@ -48,7 +48,8 @@ class Level_Creator(object):
         button_x += BUTTON_X_DELTA + BUTTON_SIZE
         self.set_object_button = Button([button_x, button_y], BUTTON_SIZE, BUTTON_SIZE, 'Object', 25, screen)
 
-        self.save_button = Button([self.screen_x - 180, button_y], BUTTON_SIZE, BUTTON_SIZE, 'Save', 30, screen)
+        self.save_button = Button([self.screen_x - 360, button_y], BUTTON_SIZE, BUTTON_SIZE, 'Save', 30, screen)
+        self.cancel_buttton = Button([self.screen_x - 180, button_y], BUTTON_SIZE, BUTTON_SIZE, 'Cancel', 30, screen)
 
         while self.level_creator_is_active:
 
@@ -157,6 +158,11 @@ class Level_Creator(object):
 
             all_sprites.draw(screen)
 
+            if len(all_sprites) == 0:
+                self.cancel_buttton.disabled = True
+            else:
+                self.cancel_button.disabled = False
+
             for sprite in all_sprites:
                 sprite.rect.x += self.offset[0]
                 sprite.rect.y += self.offset[1]
@@ -210,6 +216,7 @@ class Level_Creator(object):
             self.set_ending_button.draw()
             self.set_object_button.draw()
             self.save_button.draw()
+            self.cancel_buttton.draw()
 
             pygame.display.flip()
             clock.tick(800)

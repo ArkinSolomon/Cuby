@@ -20,7 +20,7 @@ class Level(object):
         self.UNLOCK_SOUND = pygame.mixer.Sound('exit_unlock.wav')
 
         self.screen_x, self.screen_y = pygame.display.get_surface().get_size()
-        self.screenRect = pygame.Rect(0, 0, self.screen_x, self.screen_y)
+        self.screen_rect = pygame.Rect(0, 0, self.screen_x, self.screen_y)
 
         self.least_x = 0
         self.greatest_x = 0
@@ -88,7 +88,7 @@ class Level(object):
     def __check_draw(self, sprite_group):
         for sprite in sprite_group:
             if self.render:
-                if self.screenRect.colliderect(sprite.rect):
+                if sprite.rect.left <= self.screen_rect.right and sprite.rect.bottom >= self.screen_rect.top and self.screen_rect.colliderect(sprite.rect):
                     self.screen.blit(sprite.image, sprite.rect)
                     sprite.drawn = True
                 else:

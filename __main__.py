@@ -18,7 +18,11 @@ from button import Button
 This file handles the game initialization as well as game saving.
 '''
 
-os.system('clear')
+# Clear console
+if sys.platform == 'win32':
+    os.system('cls')
+else:
+    os.system('clear')
 
 # Runtime flags
 VERBOSE = True if '-v' in sys.argv or '--verbose' in sys.argv else False
@@ -34,7 +38,7 @@ if DEBUG: print 'Debugging Cuby'
 
 pygame.init()
 if VERBOSE: print 'Pygame initialized'
-screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN, pygame.HWSURFACE)
+screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN | pygame.HWSURFACE)
 
 # Update level in file
 def __update_level_file(c):
@@ -60,7 +64,7 @@ def parse_levels():
         __level_path.touch()
         __new_file = True
     if not __new_file:
-        if VERBOSE: print 'Level file exists, making new'
+        if VERBOSE: print 'Level file exists'
         with __level_path.open(mode='r') as f:
             file = str(f.read())
             levels = file.split('*LEVEL*\n')
@@ -156,6 +160,8 @@ def __quit():
 cloud_counter = 0
 clock = pygame.time.Clock()
 
+parse_levels()
+start_button.disabled = len(__levels) == 0
 while main_menu_is_active:
 
     for event in pygame.event.get():
@@ -171,9 +177,10 @@ while main_menu_is_active:
 
         # Start the game
         if start_button.check_click(mouse_pos[0], mouse_pos[1]):
+            if current_level >= len(__levels):
+                current_level = 0
+                if VERBBOSE: print 'Currrent level higher than max levels, reseting to 0' 
             if VERBOSE: print 'Starting game at level %d' % (current_level + 1)
-            __levels = []
-            parse_levels()
             Game(__levels, update, VERBOSE, DEBUG).start(screen)
 
         if level_create_button.check_click(mouse_pos[0], mouse_pos[1]):
