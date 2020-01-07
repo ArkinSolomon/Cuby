@@ -21,7 +21,7 @@ class Game(object):
 
         # Constants
         self.GRAVITY = .19
-        self.FPS = 800 # I don't know about this number but it's good
+        self.FPS = 800 # I don't know about this number but it's good (I think the framerate may be locked on this computer)
         self.PARALAX_RATIO = 3
 
         # Sounds
@@ -140,6 +140,8 @@ class Game(object):
 
                 # Move enemies
                 for enemy in level.enemies:
+                    is_x_collide = False
+                    is_y_collide = False
                     add = enemy.speed
                     enemy.prev_x = enemy.rect.x
                     if enemy.rect.centerx < player.rect.centerx:
@@ -160,7 +162,9 @@ class Game(object):
                         enemy.image = pygame.image.load('enemy_reversed.png')
                     eCopy = level.enemies.copy()
                     eCopy.remove(enemy)
-                    collisions = pygame.sprite.spritecollide(enemy, level.level_group, False) + pygame.sprite.spritecollide(enemy, level.objects, False) + pygame.sprite.spritecollide(enemy, eCopy, False)
+                    player_collisions = pygame.sprite.spritecollide(enemy, player_group, False)
+                    if len(player_collisions) > 0: is_x_collide = True
+                    collisions = pygame.sprite.spritecollide(enemy, level.level_group, False) + pygame.sprite.spritecollide(enemy, level.objects, False) + pygame.sprite.spritecollide(enemy, eCopy, False) + player_collisions
                     if len(collisions) != 0 and not enemy.is_in_air:
                         enemy.jump()
                         self.JUMP_ENEMY.play()
@@ -172,7 +176,15 @@ class Game(object):
                     enemy.prev_y = enemy.rect.y
                     enemy.vertical_acceleration += self.GRAVITY
                     enemy.rect.y += enemy.vertical_acceleration
-                    for collision in pygame.sprite.spritecollide(enemy, level.level_group, False) + pygame.sprite.spritecollide(enemy, level.objects, False):
+                    player_collisions = pygame.sprite.spritecollide(enemy, player_group, False)
+                    c = True
+                    if len(player_collisions) > 0:
+                        is_y_collide = True
+                        if player.rect.bottom < enemy.rect.centery:
+                            enemy.kill()
+                            c = False
+                    if not c: continue
+                    for collision in pygame.sprite.spritecollide(enemy, level.level_group, False) + pygame.sprite.spritecollide(enemy, level.objects, False) + pygame.sprite.spritecollide(enemy, eCopy, False) + player_collisions:
                         if enemy.prev_y < collision.rect.top:
                             enemy.rect.bottom = collision.rect.top
                             enemy.is_in_air = False
@@ -181,12 +193,11 @@ class Game(object):
                         enemy.vertical_acceleration = 0
                     if enemy.vertical_acceleration != 0:
                         enemy.is_in_air = True
+                    if is_x_collide or is_y_collide: player.health -= 1
                     if enemy.rect.centery > vertical_constraints[1]:
                         enemy.kill()
 
-                # Player damage
-                for _ in pygame.sprite.spritecollide(player, level.enemies, False):
-                    player.health -= 1
+                # Player kill
                 if player.health <= 0:
                     player.kill
                     if self.VERBOSE: print 'Gameplay stopped, returning to main menu'

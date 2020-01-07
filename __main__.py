@@ -179,9 +179,11 @@ while main_menu_is_active:
         if start_button.check_click(mouse_pos[0], mouse_pos[1]):
             if current_level >= len(__levels):
                 current_level = 0
-                if VERBBOSE: print 'Currrent level higher than max levels, reseting to 0' 
+                if VERBOSE: print 'Currrent level higher than max levels, reseting to 0'
             if VERBOSE: print 'Starting game at level %d' % (current_level + 1)
             Game(__levels, update, VERBOSE, DEBUG).start(screen)
+            __levels = []
+            parse_levels()
 
         if level_create_button.check_click(mouse_pos[0], mouse_pos[1]):
             if VERBOSE: print 'Starting level creator'
