@@ -71,6 +71,44 @@ class Game(object):
                 Game logic
                 '''
 
+                # Handle objects
+                for object in level.objects:
+
+                    # Move horizontally
+                    object.prev_x = object.rect.x
+                    object.rect.x += object.delta
+                    for collision in pygame.sprite.spritecollide(object, level.level_group, False):
+                        if object.prev_x < object.rect.x:
+                            object.rect.right = collision.rect.left
+                        elif object.prev_x > object.rect.x:
+                            object.rect.left = collision.rect.right
+
+                    # Bound to walls
+                    if object.rect.left < horizontal_constraints[0]:
+                        object.rect.left = horizontal_constraints[0]
+                    if object.rect.right > horizontal_constraints[1]:
+                        object.rect.right = horizontal_constraints[1]
+
+                    object.delta = 0
+
+                    # Gravity
+                    object.prev_y = object.rect.y
+                    object.vertical_acceleration += self.GRAVITY
+                    object.rect.y += object.vertical_acceleration
+                    g = level.level_group.copy()
+                    g.add(level.objects)
+                    g.remove(object)
+                    for collision in pygame.sprite.spritecollide(object, g, False):
+                        if object.prev_y < collision.rect.top:
+                            object.rect.bottom = collision.rect.top
+                        else:
+                            object.rect.top = collision.rect.bottom
+                        object.vertical_acceleration = 0
+                    for collision in pygame.sprite.spritecollide(object, player_group, False):
+                        if object.prev_y < collision.rect.top:
+                            object.rect.bottom = collision.rect.top
+                            object.vertical_acceleration = 0
+
                 # Horizontal logic
                 player.prev_x = player.rect.x
                 keys = pygame.key.get_pressed()
@@ -180,7 +218,7 @@ class Game(object):
                     c = True
                     if len(player_collisions) > 0:
                         is_y_collide = True
-                        if player.rect.bottom < enemy.rect.centery:
+                        if player.rect.bottom < enemy.rect.centery and not enemy.is_in_air:
                             enemy.kill()
                             c = False
                     if not c: continue
@@ -202,44 +240,6 @@ class Game(object):
                     player.kill
                     if self.VERBOSE: print 'Gameplay stopped, returning to main menu'
                     return
-
-                # Handle objects
-                for object in level.objects:
-
-                    # Move horizontally
-                    object.prev_x = object.rect.x
-                    object.rect.x += object.delta
-                    for collision in pygame.sprite.spritecollide(object, level.level_group, False):
-                        if object.prev_x < object.rect.x:
-                            object.rect.right = collision.rect.left
-                        elif object.prev_x > object.rect.x:
-                            object.rect.left = collision.rect.right
-
-                    # Bound to walls
-                    if object.rect.left < horizontal_constraints[0]:
-                        object.rect.left = horizontal_constraints[0]
-                    if object.rect.right > horizontal_constraints[1]:
-                        object.rect.right = horizontal_constraints[1]
-
-                    object.delta = 0
-
-                    # Gravity
-                    object.prev_y = object.rect.y
-                    object.vertical_acceleration += self.GRAVITY
-                    object.rect.y += object.vertical_acceleration
-                    g = level.level_group.copy()
-                    g.add(level.objects)
-                    g.remove(object)
-                    for collision in pygame.sprite.spritecollide(object, g, False):
-                        if object.prev_y < collision.rect.top:
-                            object.rect.bottom = collision.rect.top
-                        else:
-                            object.rect.top = collision.rect.bottom
-                        object.vertical_acceleration = 0
-                    for collision in pygame.sprite.spritecollide(object, player_group, False):
-                        if object.prev_y < collision.rect.top:
-                            object.rect.bottom = collision.rect.top
-                            object.vertical_acceleration = 0
 
                 offset_x = 0
                 offset_y = 0
