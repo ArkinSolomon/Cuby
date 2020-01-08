@@ -159,9 +159,9 @@ class Level_Creator(object):
             all_sprites.draw(screen)
 
             if len(all_sprites) == 0:
-                self.cancel_buttton.disabled = True
+                self.save_button.disabled = True
             else:
-                self.cancel_button.disabled = False
+                self.save_button.disabled = False
 
             for sprite in all_sprites:
                 sprite.rect.x += self.offset[0]
