@@ -210,6 +210,7 @@ while main_menu_is_active:
         clouds = clouds_2
         clouds_2 = Cloud(screen, screen_x, screen_y, [-150 + screen_x, 2 * screen_x + 150], [-450, screen_y + 450], False).clouds
 
+    screen.blit(pygame.image.load('logo.png'), ((screen_x / 2) - 450, 60))
     start_button.draw()
     quit_button.draw()
     level_create_button.draw()
