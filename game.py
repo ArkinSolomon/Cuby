@@ -72,65 +72,65 @@ class Game(object):
                 Game logic
                 '''
 
-                # Move enemies
                 for enemy in level.enemies:
+
+                    is_player_x_collide = len(pygame.sprite.spritecollide(enemy, player_group, False)) > 0
                     is_x_collide = False
-                    is_y_collide = False
-                    add = enemy.speed
-                    enemy.prev_x = enemy.rect.x
-                    if enemy.rect.centerx < player.rect.centerx:
-                        if enemy.rect.centerx + enemy.speed > player.rect.centerx:  
-                            add = player.rect.centerx - enemy.rect.centerx
-                        enemy.rect.x += abs(add)
-                    elif enemy.rect.centerx > player.rect.centerx:
-                        if enemy.rect.centerx - enemy.speed < player.rect.centerx:
-                            add = player.rect.centerx - enemy.rect.centerx
-                        enemy.rect.x -= abs(add)
-                    if enemy.rect.left < horizontal_constraints[0]:
-                        enemy.rect.left = horizontal_constraints[0]
-                    if enemy.rect.right > horizontal_constraints[1]:
-                        enemy.rect.right = horizontal_constraints[1]
-                    if enemy.prev_x < enemy.rect.x:
-                        enemy.image = pygame.image.load('enemy.png')
-                    elif enemy.prev_x > enemy.rect.x:
-                        enemy.image = pygame.image.load('enemy_reversed.png')
-                    eCopy = level.enemies.copy()
-                    eCopy.remove(enemy)
-                    player_collisions = pygame.sprite.spritecollide(enemy, player_group, False)
-                    if len(player_collisions) > 0: is_x_collide = True
-                    collisions = pygame.sprite.spritecollide(enemy, level.level_group, False) + pygame.sprite.spritecollide(enemy, level.objects, False)
-                    if len(collisions) != 0 and not enemy.is_in_air:
-                        enemy.jump()
-                        self.JUMP_ENEMY.play()
-                    for collision in collisions:
+
+                    if enemy.is_enabled:
+
+                        exclusive_enemy_group = level.enemies.copy()
+                        exclusive_enemy_group.remove(enemy)
+
+                        # Move horizontally
+                        enemy.prev_x = enemy.rect.x
+                        if enemy.rect.centerx < player.rect.centerx:
+                            enemy.rect.x += abs(enemy.speed)
+                        elif enemy.rect.centerx > player.rect.centerx:
+                            enemy.rect.x -= abs(enemy.speed)
+
+                        # Loop through all horizontal collisions
+                        collisions = pygame.sprite.spritecollide(enemy, level.level_group, False) + pygame.sprite.spritecollide(enemy, player_group, False) + pygame.sprite.spritecollide(enemy, exclusive_enemy_group, False) + pygame.sprite.spritecollide(enemy, level.objects, False)
+                        for collision in collisions:
+                            if not is_x_collide and not isinstance(collision, Enemy): is_x_collide = True
+                            if enemy.prev_x < enemy.rect.x:
+                                enemy.rect.right = collision.rect.left
+                            elif enemy.prev_x > enemy.rect.x:
+                                enemy.rect.left = collision.rect.right
+
+                        if enemy.rect.left < horizontal_constraints[0]:
+                            enemy.rect.left = horizontal_constraints[0]
+                        if enemy.rect.right > horizontal_constraints[1]:
+                            enemy.rect.right = horizontal_constraints[1]
                         if enemy.prev_x < enemy.rect.x:
-                            enemy.rect.right = collision.rect.left
+                            enemy.image = pygame.image.load('enemy.png')
                         elif enemy.prev_x > enemy.rect.x:
-                            enemy.rect.left = collision.rect.right
+                            enemy.image = pygame.image.load('enemy_reversed.png')
+
+                    # Move vertically
                     enemy.prev_y = enemy.rect.y
+                    if is_x_collide and enemy.is_enabled: enemy.jump()
                     enemy.vertical_acceleration += self.GRAVITY
                     enemy.rect.y += enemy.vertical_acceleration
-                    player_collisions = pygame.sprite.spritecollide(enemy, player_group, False)
-                    c = True
-                    if len(player_collisions) > 0:
-                        is_y_collide = True
-                        if player.rect.bottom < enemy.rect.centery and not enemy.is_in_air:
-                            enemy.kill()
-                            c = False
-                    if not c: continue
-                    for collision in pygame.sprite.spritecollide(enemy, level.level_group, False) + pygame.sprite.spritecollide(enemy, level.objects, False) + pygame.sprite.spritecollide(enemy, eCopy, False) + player_collisions:
-                        if enemy.prev_y < collision.rect.top:
-                            enemy.rect.bottom = collision.rect.top
-                            enemy.is_in_air = False
-                        elif not isinstance(collision, Enemy):
-                            enemy.rect.top = collision.rect.bottom
-                        enemy.vertical_acceleration = 0
-                    if enemy.vertical_acceleration != 0:
-                        enemy.is_in_air = True
-                    if is_x_collide or is_y_collide: player.health -= 1
+                    if enemy.is_enabled:
+
+                        collisions = pygame.sprite.spritecollide(enemy, level.level_group, False) + pygame.sprite.spritecollide(enemy, exclusive_enemy_group, False) + pygame.sprite.spritecollide(enemy, level.objects, False)
+
+                        # Loop through all vertical collisions
+                        is_player_y_collide = len(pygame.sprite.spritecollide(enemy, player_group, False)) > 0
+                        for collision in collisions:
+                            if enemy.prev_y < collision.rect.top:
+                                enemy.rect.bottom = collision.rect.top
+                                enemy.is_in_air = False
+                            else: enemy.rect.top = collision.rect.bottom
+                            enemy.vertical_acceleration = 0
+                        if enemy.vertical_acceleration != 0: enemy.is_in_air = True
+
+                    # Check if enemy died
                     if enemy.rect.centery > vertical_constraints[1]:
                         enemy.kill()
-
+                        continue
+                    if is_player_x_collide or is_player_y_collide and not enemy.is_enabled: player.health -= 1
 
                 # Handle objects
                 for object in level.objects:
@@ -207,6 +207,11 @@ class Game(object):
                     player.vertical_acceleration -= 9
                     player.is_in_air = True
 
+                if keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]:
+                    player.vertical_acceleration += 4
+                    player.is_slamming = True
+                else: player.is_slamming = False
+
                 # Change y values
                 player.prev_y = player.rect.y
                 player.vertical_acceleration += self.GRAVITY
@@ -222,8 +227,13 @@ class Game(object):
                     else:
                         player.rect.top = collision.rect.bottom
                     player.vertical_acceleration = 0
-                if player.vertical_acceleration != 0:
-                    player.is_in_air = True
+                if player.vertical_acceleration != 0: player.is_in_air = True
+
+                enemy = pygame.sprite.spritecollideany(player, level.enemies)
+
+                if enemy != None and player.is_slamming and enemy.prev_y > player.prev_y + 150:
+                    enemy.kill_by_player()
+                    enemy.image = pygame.image.load('enemy_dead.png')
 
                 # Change player image depending on direcion moved
                 if player.prev_x < player.rect.x:

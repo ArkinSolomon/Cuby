@@ -13,6 +13,7 @@ class Enemy(pygame.sprite.Sprite):
         self.is_in_air = False
         self.jump_power = 8
         self.drawn = False
+        self.is_enabled = True
 
         # Initialize sprite
         self.image = pygame.Surface((75, 75), pygame.SRCALPHA)
@@ -24,5 +25,6 @@ class Enemy(pygame.sprite.Sprite):
         self.prev_y = self.pos[1]
 
     def jump(self):
-        if self.is_in_air: return
-        self.vertical_acceleration -= self.jump_power
+        if not self.is_in_air: self.vertical_acceleration -= self.jump_power
+
+    def kill_by_player(self): self.is_enabled = False

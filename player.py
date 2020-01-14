@@ -17,6 +17,7 @@ class Player(pygame.sprite.Sprite):
         self.color = pygame.Color('lightgreen')
         self.is_in_air = False
         self.health = 200
+        self.is_slamming = False
         self.drawn = False
 
         # Initialize player
