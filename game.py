@@ -22,7 +22,7 @@ class Game(object):
 
         # Constants
         self.GRAVITY = .19
-        self.FPS = 60 # I don't know about this number but it's good (I think the framerate may be locked on this computer)
+        self.FPS = 60
         self.PARALAX_RATIO = 3
 
         # Sounds
@@ -92,6 +92,7 @@ class Game(object):
                         # Loop through all horizontal collisions
                         collisions = pygame.sprite.spritecollide(enemy, level.level_group, False) + pygame.sprite.spritecollide(enemy, player_group, False) + pygame.sprite.spritecollide(enemy, exclusive_enemy_group, False) + pygame.sprite.spritecollide(enemy, level.objects, False)
                         for collision in collisions:
+                            if isinstance(collision, Enemy) and not collision.is_enabled: continue
                             if not is_x_collide and not isinstance(collision, Enemy): is_x_collide = True
                             if enemy.prev_x < enemy.rect.x:
                                 enemy.rect.right = collision.rect.left
@@ -119,10 +120,11 @@ class Game(object):
                         # Loop through all vertical collisions
                         is_player_y_collide = len(pygame.sprite.spritecollide(enemy, player_group, False)) > 0
                         for collision in collisions:
-                            if enemy.prev_y < collision.rect.top:
+                            if isinstance(collision, Enemy) and not collision.is_enabled: continue
+                            if enemy.prev_y < enemy.rect.y:
                                 enemy.rect.bottom = collision.rect.top
                                 enemy.is_in_air = False
-                            else: enemy.rect.top = collision.rect.bottom
+                            elif enemy.prev_y > enemy.rect.y: enemy.rect.top = collision.rect.bottom
                             enemy.vertical_acceleration = 0
                         if enemy.vertical_acceleration != 0: enemy.is_in_air = True
 
@@ -201,16 +203,16 @@ class Game(object):
                 if player.rect.right > horizontal_constraints[1]:
                     player.rect.right = horizontal_constraints[1]
 
-                # Vertical logic
-                if (keys[pygame.K_w] or keys[pygame.K_SPACE]) and not player.is_in_air:
-                    self.JUMP.play()
-                    player.vertical_acceleration -= 9
-                    player.is_in_air = True
-
                 if keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]:
                     player.vertical_acceleration += 4
                     player.is_slamming = True
                 else: player.is_slamming = False
+
+                # Vertical logic
+                if (keys[pygame.K_w] or keys[pygame.K_SPACE]) and not player.is_in_air and not player.is_slamming:
+                    self.JUMP.play()
+                    player.vertical_acceleration -= 9
+                    player.is_in_air = True
 
                 # Change y values
                 player.prev_y = player.rect.y
@@ -252,6 +254,10 @@ class Game(object):
                     player.kill
                     if self.VERBOSE: print 'Gameplay stopped, returning to main menu'
                     return
+
+                '''
+                Camera logic
+                '''
 
                 offset_x = 0
                 offset_y = 0
