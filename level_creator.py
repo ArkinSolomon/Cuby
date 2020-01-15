@@ -147,6 +147,10 @@ class Level_Creator(object):
                 self.level_creator_is_active = False
                 return
 
+            if button_clicks[6]:
+                self.level_creator_is_active = False
+                return
+
             # Draw sky
             screen.fill(pygame.Color('lightblue'))
             screen.blit(pygame.image.load('sun.png'), (50, 50))
@@ -219,7 +223,7 @@ class Level_Creator(object):
             self.cancel_buttton.draw()
 
             pygame.display.flip()
-            clock.tick(800)
+            clock.tick(60)
 
     def __calculate_top_left(self, pos):
         top_left = [0, 0]
@@ -234,7 +238,7 @@ class Level_Creator(object):
         return top_left
 
     def __calculate_button_clicks(self, mouse_pos):
-        return [self.set_player_start_button.check_click(mouse_pos[0], mouse_pos[1]), self.set_platform_button.check_click(mouse_pos[0], mouse_pos[1]), self.set_enemy_button.check_click(mouse_pos[0], mouse_pos[1]), self.set_ending_button.check_click(mouse_pos[0], mouse_pos[1]), self.set_object_button.check_click(mouse_pos[0], mouse_pos[1]), self.save_button.check_click(mouse_pos[0], mouse_pos[1])]
+        return [self.set_player_start_button.check_click(mouse_pos[0], mouse_pos[1]), self.set_platform_button.check_click(mouse_pos[0], mouse_pos[1]), self.set_enemy_button.check_click(mouse_pos[0], mouse_pos[1]), self.set_ending_button.check_click(mouse_pos[0], mouse_pos[1]), self.set_object_button.check_click(mouse_pos[0], mouse_pos[1]), self.save_button.check_click(mouse_pos[0], mouse_pos[1]),  self.cancel_buttton.check_click(mouse_pos[0], mouse_pos[1])]
 
     def stop(self):
         if self.VERBOSE: print 'Halt signal recieved, creator closing'
