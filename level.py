@@ -88,11 +88,11 @@ class Level(object):
     def __check_draw(self, sprite_group):
         for sprite in sprite_group:
             if self.render:
-                if sprite.rect.left <= self.screen_rect.right and sprite.rect.bottom >= self.screen_rect.top and self.screen_rect.colliderect(sprite.rect):
+                if (sprite.rect.right < 0) or (sprite.rect.bottom < 0) or (sprite.rect.top > self.screen_y) or (sprite.rect.left > self.screen_x):
+                    sprite.drawn = False
+                else:
                     self.screen.blit(sprite.image, sprite.rect)
                     sprite.drawn = True
-                else:
-                    sprite.drawn = False
             else:
                 if sprite.drawn:
                     self.screen.blit(sprite.image, sprite.rect)
