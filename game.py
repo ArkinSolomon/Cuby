@@ -132,7 +132,7 @@ class Game(object):
                     if enemy.rect.centery > vertical_constraints[1]:
                         enemy.kill()
                         continue
-                    if is_player_x_collide or is_player_y_collide and not enemy.is_enabled: player.health -= 1
+                    if is_player_x_collide or is_player_y_collide and enemy.is_enabled: player.health -= 1
 
                 # Handle objects
                 for object in level.objects:
@@ -285,20 +285,23 @@ class Game(object):
                     vertical_constraints[1] += offset_y
                     level.ending.rect.y += offset_y
 
-                for cloud in level.clouds:
-                    cloud.rect.x += offset_x / self.PARALAX_RATIO
-                    cloud.rect.y += offset_y / self.PARALAX_RATIO
+                if offset_x != 0 or offset_y != 0:
+                    
+                    # Loop through all clouds
+                    for cloud in level.clouds:
+                        cloud.rect.x += offset_x / self.PARALAX_RATIO
+                        cloud.rect.y += offset_y / self.PARALAX_RATIO
 
-                # Loop through all of the level's sprites
-                for platform_sprite in level.level_group:
-                    platform_sprite.rect.x += offset_x
-                    platform_sprite.rect.y += offset_y
-                for enemy in level.enemies:
-                    enemy.rect.x += offset_x
-                    enemy.rect.y += offset_y
-                for object in level.objects:
-                    object.rect.x += offset_x
-                    object.rect.y += offset_y
+                    # Loop through all of the level's sprites
+                    for platform_sprite in level.level_group:
+                        platform_sprite.rect.x += offset_x
+                        platform_sprite.rect.y += offset_y
+                    for enemy in level.enemies:
+                        enemy.rect.x += offset_x
+                        enemy.rect.y += offset_y
+                    for object in level.objects:
+                        object.rect.x += offset_x
+                        object.rect.y += offset_y
 
                 # Check if level passed
                 level.update()
