@@ -103,3 +103,11 @@ class Level(object):
         self.__check_draw(self.ending_group)
         self.__check_draw(self.objects)
         self.__check_draw(self.enemies)
+
+    def disable_ai(self):
+        for enemy in self.enemies:
+            enemy.has_ai = False
+
+    def enable_ai(self):
+        for enemy in self.enemies:
+            enemy.has_ai = True

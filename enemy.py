@@ -14,6 +14,7 @@ class Enemy(pygame.sprite.Sprite):
         self.jump_power = 8
         self.drawn = False
         self.is_enabled = True
+        self.has_ai = True
 
         # Initialize sprite
         self.image = pygame.Surface((75, 75), pygame.SRCALPHA)
