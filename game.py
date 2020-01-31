@@ -209,6 +209,7 @@ class Game(object):
                         enemy.rect.right = player.rect.left
                     if pygame.sprite.spritecollideany(enemy, level.level_group) != None or pygame.sprite.spritecollideany(enemy, level.objects) != None:
                         enemy.rect.x = enemy_prev_pos
+                        player.rect.x = player.prev_x
                     if enemy.rect.left < horizontal_constraints[0] or enemy.rect.right > horizontal_constraints[1]:
                         enemy.kill_by_player()
 
@@ -257,15 +258,22 @@ class Game(object):
                                 enemy.rect.top = player.rect.bottom
                         else:
                             if not enemy.is_in_air:
-                                enemy.rect.top = player.rect.bottom
-                            else:
                                 player.rect.bottom = enemy.rect.top
+                                player.is_in_air = False
+                            else:
+                                enemy.rect.top = player.rect.bottom
 
                 # Change player image depending on direcion moved
                 if player.prev_x < player.rect.x:
-                    player.image = pygame.image.load('player.png')
+                    if player.is_slamming:
+                        player.image = pygame.image.load('player_slamming.png')
+                    else:
+                        player.image = pygame.image.load('player.png')
                 elif player.prev_x > player.rect.x:
-                    player.image = pygame.image.load('player_reversed.png')
+                    if player.is_slamming:
+                        player.image = pygame.image.load('player_slamming_reversed.png')
+                    else:
+                        player.image = pygame.image.load('player_reversed.png')
 
                 # Debug keys
                 if self.DEBUG:
