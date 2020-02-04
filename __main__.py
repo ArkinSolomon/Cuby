@@ -182,6 +182,7 @@ while main_menu_is_active:
                 if VERBOSE: print 'Currrent level higher than max levels, reseting to 0'
             if VERBOSE: print 'Starting game at level %d' % (current_level + 1)
             Game(__levels, update, VERBOSE, DEBUG).start(screen)
+            pygame.mouse.set_visible(True)
             __levels = []
             parse_levels()
 

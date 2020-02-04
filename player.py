@@ -19,6 +19,7 @@ class Player(pygame.sprite.Sprite):
         self.health = 200
         self.is_slamming = False
         self.drawn = False
+        self.direction = 'r'
 
         # Initialize player
         self.image = pygame.image.load('player.png')

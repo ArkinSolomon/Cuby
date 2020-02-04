@@ -20,6 +20,8 @@ class Game(object):
         self.VERBOSE = verbose
         self.DEBUG = debug
 
+        self.free_camera_movement = False
+
         # Constants
         self.GRAVITY = .19
         self.FPS = 60
@@ -38,6 +40,7 @@ class Game(object):
         clock = pygame.time.Clock()
         screen_x, screen_y = pygame.display.get_surface().get_size()
         self.SCREEN_SIZE = [screen_x, screen_y]
+        pygame.mouse.set_visible(False)
 
         if self.VERBOSE: print 'Display initialized'
 
@@ -140,6 +143,10 @@ class Game(object):
                 # Handle objects
                 for object in level.objects:
 
+                    if object.rect.top > vertical_constraints[1]:
+                        object.kill()
+                        continue
+
                     # Move horizontally
                     object.prev_x = object.rect.x
                     object.rect.x += object.delta
@@ -178,17 +185,17 @@ class Game(object):
                 # Horizontal logic
                 player.prev_x = player.rect.x
                 keys = pygame.key.get_pressed()
-                if keys[pygame.K_d]:
+                if keys[pygame.K_d] and not self.free_camera_movement:
                     player.rect.x += player.speed
-                if keys[pygame.K_a]:
+                if keys[pygame.K_a] and not self.free_camera_movement:
                     player.rect.x -= player.speed
                 collisions = pygame.sprite.spritecollide(player, level.level_group, False)
 
                 # Loop through all horizontal platform collisions
                 for collision in collisions:
-                    if keys[pygame.K_d] and not keys[pygame.K_a]:
+                    if keys[pygame.K_d] and not keys[pygame.K_a] and not self.free_camera_movement:
                         player.rect.right = collision.rect.left
-                    elif keys[pygame.K_a] and not keys[pygame.K_d]:
+                    elif keys[pygame.K_a] and not keys[pygame.K_d] and not self.free_camera_movement:
                         player.rect.left = collision.rect.right
 
                 # Move blocks
@@ -265,15 +272,20 @@ class Game(object):
 
                 # Change player image depending on direcion moved
                 if player.prev_x < player.rect.x:
-                    if player.is_slamming:
-                        player.image = pygame.image.load('player_slamming.png')
-                    else:
-                        player.image = pygame.image.load('player.png')
+                    player.direction = 'r'
                 elif player.prev_x > player.rect.x:
-                    if player.is_slamming:
+                    player.direction = 'l'
+
+                if player.is_slamming:
+                    if player.direction == 'l':
                         player.image = pygame.image.load('player_slamming_reversed.png')
-                    else:
+                    elif player.direction == 'r':
+                        player.image = pygame.image.load('player_slamming.png')
+                else:
+                    if player.direction == 'l':
                         player.image = pygame.image.load('player_reversed.png')
+                    elif player.direction == 'r':
+                        player.image = pygame.image.load('player.png')
 
                 # Debug keys
                 if self.DEBUG:
@@ -290,6 +302,13 @@ class Game(object):
                     if keys[pygame.K_EQUALS]:
                         level.enable_ai()
 
+                    # Start or stop free camera movement
+                    if keys[pygame.K_F1]:
+                        self.free_camera_movement = True
+                    if keys[pygame.K_F1]:
+                        self.free_camera_movement = False
+
+
                 # Player kill
                 if player.health <= 0:
                     player.kill
@@ -303,8 +322,14 @@ class Game(object):
                 offset_x = 0
                 offset_y = 0
 
+                if self.free_camera_movement:
+                    if keys[pygame.K_d]:
+                        offset_x += player.speed
+                    if keys[pygame.K_a]:
+                        offset_x -= player.speed
+
                 # Move camera horizontally
-                if player.rect.centerx > horizontal_constraints[0] + (self.SCREEN_SIZE[0] / 2) and player.rect.centerx < horizontal_constraints[1] - (self.SCREEN_SIZE[0] / 2):
+                if not self.free_camera_movement and player.rect.centerx > horizontal_constraints[0] + (self.SCREEN_SIZE[0] / 2) and player.rect.centerx < horizontal_constraints[1] - (self.SCREEN_SIZE[0] / 2):
                     if player.rect.x > player.prev_x:
                         offset_x -= player.speed
                         player.rect.x -= player.speed
