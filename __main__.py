@@ -40,6 +40,8 @@ pygame.init()
 if VERBOSE: print 'Pygame initialized'
 screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN | pygame.HWSURFACE)
 
+LOGO = pygame.image.load('logo.png')
+
 # Update level in file
 def __update_level_file(c):
         with __data_path.open(mode='w') as file:
@@ -211,7 +213,7 @@ while main_menu_is_active:
         clouds = clouds_2
         clouds_2 = Cloud(screen, screen_x, screen_y, [-150 + screen_x, 2 * screen_x + 150], [-450, screen_y + 450], False).clouds
 
-    screen.blit(pygame.image.load('logo.png'), ((screen_x / 2) - 450, 60))
+    screen.blit(LOGO, ((screen_x / 2) - 450, 60))
     start_button.draw()
     quit_button.draw()
     level_create_button.draw()
