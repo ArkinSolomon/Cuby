@@ -33,6 +33,15 @@ class Game(object):
         self.JUMP_ENEMY = pygame.mixer.Sound('jump_enemy.wav')
         self.JUMP = pygame.mixer.Sound('jump.wav')
 
+        # Load images
+        self.ENEMY_IMAGE = pygame.image.load('enemy.png')
+        self.ENEMY_REVERSED = pygame.image.load('enemy_reversed.png')
+        self.PLAYER_SLAMMING_REVERSED = pygame.image.load('player_slamming_reversed.png')
+        self.PLAYER_SLAMMING = pygame.image.load('player_slamming.png')
+        self.PLAYER_REVERSED = pygame.image.load('player_reversed.png')
+        self.PLAYER_IMAGE = pygame.image.load('player.png')
+        self.SUN = pygame.image.load('sun.png')
+
         if self.VERBOSE: print 'Game initialized'
 
     # Start the game
@@ -112,9 +121,9 @@ class Game(object):
                         if enemy.rect.right > horizontal_constraints[1]:
                             enemy.rect.right = horizontal_constraints[1]
                         if enemy.prev_x < enemy.rect.x:
-                            enemy.image = pygame.image.load('enemy.png')
+                            enemy.image = self.ENEMY
                         elif enemy.prev_x > enemy.rect.x:
-                            enemy.image = pygame.image.load('enemy_reversed.png')
+                            enemy.image = self.ENEMY_REVERSED
 
                     # Move vertically
                     enemy.prev_y = enemy.rect.y
@@ -282,14 +291,14 @@ class Game(object):
 
                 if player.is_slamming:
                     if player.direction == 'l':
-                        player.image = pygame.image.load('player_slamming_reversed.png')
+                        player.image = self.PLAYER_SLAMMING_REVERSED
                     elif player.direction == 'r':
-                        player.image = pygame.image.load('player_slamming.png')
+                        player.image = self.PLAYER_SLAMMING
                 else:
                     if player.direction == 'l':
-                        player.image = pygame.image.load('player_reversed.png')
+                        player.image = self.PLAYER_REVERSED
                     elif player.direction == 'r':
-                        player.image = pygame.image.load('player.png')
+                        player.image = self.PLAYER_IMAGE
 
                 # Debug keys
                 if self.DEBUG:
@@ -435,7 +444,7 @@ class Game(object):
 
                 # Draw sky
                 screen.fill(pygame.Color('lightblue'))
-                screen.blit(pygame.image.load('sun.png'), (50, 50))
+                screen.blit(self.SUN, (50, 50))
 
                 # Draw foreground items
                 level.draw()
