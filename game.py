@@ -21,6 +21,8 @@ class Game(object):
         self.DEBUG = debug
 
         self.free_camera_movement = False
+        self.total_free_camera_offset_x = 0
+        self.total_free_camera_offset_y = 0
 
         # Constants
         self.GRAVITY = .19
@@ -143,6 +145,7 @@ class Game(object):
                 # Handle objects
                 for object in level.objects:
 
+                    # Kill if it goes too low
                     if object.rect.top > vertical_constraints[1]:
                         object.kill()
                         continue
@@ -199,13 +202,14 @@ class Game(object):
                         player.rect.left = collision.rect.right
 
                 # Move blocks
-                for collision in pygame.sprite.spritecollide(player, level.objects, False):
-                    if keys[pygame.K_d] and not keys[pygame.K_a]:
-                        player.rect.right = collision.rect.left
-                        collision.delta = player.speed
-                    elif keys[pygame.K_a] and not keys[pygame.K_d]:
-                        player.rect.left = collision.rect.right
-                        collision.delta = -player.speed
+                if not self.free_camera_movement:
+                    for collision in pygame.sprite.spritecollide(player, level.objects, False):
+                        if keys[pygame.K_d] and not keys[pygame.K_a]:
+                            player.rect.right = collision.rect.left
+                            collision.delta = player.speed
+                        elif keys[pygame.K_a] and not keys[pygame.K_d]:
+                            player.rect.left = collision.rect.right
+                            collision.delta = -player.speed
 
                 # Move colliding enemies horizontally
                 for enemy in pygame.sprite.spritecollide(player, level.enemies, False):
@@ -232,7 +236,7 @@ class Game(object):
                 else: player.is_slamming = False
 
                 # Vertical logic
-                if (keys[pygame.K_w] or keys[pygame.K_SPACE]) and not player.is_in_air and not player.is_slamming:
+                if (keys[pygame.K_w] or keys[pygame.K_SPACE]) and not player.is_in_air and not player.is_slamming and not self.free_camera_movement:
                     self.JUMP.play()
                     player.vertical_acceleration -= 9
                     player.is_in_air = True
@@ -303,16 +307,39 @@ class Game(object):
                         level.enable_ai()
 
                     # Start or stop free camera movement
-                    if keys[pygame.K_F1]:
+                    if keys[pygame.K_F1] and not self.free_camera_movement:
+                        self.total_free_camera_offset_x = 0
+                        self.total_free_camera_offset_y = 0
                         self.free_camera_movement = True
-                    if keys[pygame.K_F1]:
+                        print 'Free camera movement enabled'
+                    if keys[pygame.K_F2] and self.free_camera_movement:
+                        player.rect.x -= self.total_free_camera_offset_x
+                        horizontal_constraints[0] -= self.total_free_camera_offset_x
+                        horizontal_constraints[1] -= self.total_free_camera_offset_x
+                        level.ending.rect.x -= self.total_free_camera_offset_x
+                        player.rect.y -= self.total_free_camera_offset_y
+                        vertical_constraints[0] -= self.total_free_camera_offset_y
+                        vertical_constraints[1] -= self.total_free_camera_offset_y
+                        level.ending.rect.y -= self.total_free_camera_offset_y
+                        for cloud in level.clouds:
+                            cloud.rect.x -= self.total_free_camera_offset_x / self.PARALAX_RATIO
+                            cloud.rect.y -= self.total_free_camera_offset_y / self.PARALAX_RATIO
+                        for platform_sprite in level.level_group:
+                            platform_sprite.rect.x -= self.total_free_camera_offset_x
+                            platform_sprite.rect.y -= self.total_free_camera_offset_y
+                        for enemy in level.enemies:
+                            enemy.rect.x -= self.total_free_camera_offset_x
+                            enemy.rect.y -= self.total_free_camera_offset_y
+                        for object in level.objects:
+                            object.rect.x -= self.total_free_camera_offset_x
+                            object.rect.y -= self.total_free_camera_offset_y
                         self.free_camera_movement = False
-
+                        print 'Free camera movement disabled'
 
                 # Player kill
                 if player.health <= 0:
-                    player.kill
-                    if self.VERBOSE: print 'Gameplay stopped, returning to main menu'
+                    player.kill()
+                    if self.VERBOSE: print 'Player died. Gameplay stopped, returning to main menu.'
                     return
 
                 '''
@@ -324,9 +351,16 @@ class Game(object):
 
                 if self.free_camera_movement:
                     if keys[pygame.K_d]:
-                        offset_x += player.speed
-                    if keys[pygame.K_a]:
                         offset_x -= player.speed
+                    if keys[pygame.K_a]:
+                        offset_x += player.speed
+                    if keys[pygame.K_w]:
+                        offset_y += player.speed
+                    if keys[pygame.K_s]:
+                        offset_y -= player.speed
+
+                self.total_free_camera_offset_x += offset_x
+                self.total_free_camera_offset_y += offset_y
 
                 # Move camera horizontally
                 if not self.free_camera_movement and player.rect.centerx > horizontal_constraints[0] + (self.SCREEN_SIZE[0] / 2) and player.rect.centerx < horizontal_constraints[1] - (self.SCREEN_SIZE[0] / 2):
@@ -342,10 +376,20 @@ class Game(object):
                         horizontal_constraints[0] += player.speed
                         horizontal_constraints[1] += player.speed
                         level.ending.rect.x += player.speed
+                elif self.free_camera_movement:
+                    player.rect.x += offset_x
+                    horizontal_constraints[0] += offset_x
+                    horizontal_constraints[1] += offset_x
+                    level.ending.rect.x += offset_x
 
                 # Move camera vertically
-                if player.rect.centery > vertical_constraints[0] + (self.SCREEN_SIZE[1] / 2) and player.rect.centery < vertical_constraints[1] - (self.SCREEN_SIZE[1] / 2) and player.prev_y != player.rect.y:
+                if not self.free_camera_movement and player.rect.centery > vertical_constraints[0] + (self.SCREEN_SIZE[1] / 2) and player.rect.centery < vertical_constraints[1] - (self.SCREEN_SIZE[1] / 2) and player.prev_y != player.rect.y:
                     offset_y = self.SCREEN_SIZE[1] / 2 - player.rect.centery
+                    player.rect.y += offset_y
+                    vertical_constraints[0] += offset_y
+                    vertical_constraints[1] += offset_y
+                    level.ending.rect.y += offset_y
+                elif self.free_camera_movement:
                     player.rect.y += offset_y
                     vertical_constraints[0] += offset_y
                     vertical_constraints[1] += offset_y
@@ -358,13 +402,17 @@ class Game(object):
                         cloud.rect.x += offset_x / self.PARALAX_RATIO
                         cloud.rect.y += offset_y / self.PARALAX_RATIO
 
-                    # Loop through all of the level's sprites
+                    # Loop through all of the level's platforms
                     for platform_sprite in level.level_group:
                         platform_sprite.rect.x += offset_x
                         platform_sprite.rect.y += offset_y
+
+                    # Loop through all of the level's enemies
                     for enemy in level.enemies:
                         enemy.rect.x += offset_x
                         enemy.rect.y += offset_y
+
+                    # Loop through all of the level's objects
                     for object in level.objects:
                         object.rect.x += offset_x
                         object.rect.y += offset_y
@@ -376,8 +424,9 @@ class Game(object):
                     self.update(m)
 
                 # Check if player died
-                if player.rect.top > self.SCREEN_SIZE[1] + 100:
-                    if self.VERBOSE: print 'Gameplay stopped, returning to main menu'
+                if player.rect.top > vertical_constraints[1]:
+                    player.kill()
+                    if self.VERBOSE: print 'Player died. Gameplay stopped, returning to main menu.'
                     return
 
                 '''
