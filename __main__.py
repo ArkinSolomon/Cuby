@@ -219,4 +219,4 @@ while main_menu_is_active:
     level_create_button.draw()
     pygame.display.flip()
 
-    clock.tick(800)
+    clock.tick(60)
