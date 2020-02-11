@@ -121,7 +121,7 @@ class Game(object):
                         if enemy.rect.right > horizontal_constraints[1]:
                             enemy.rect.right = horizontal_constraints[1]
                         if enemy.prev_x < enemy.rect.x:
-                            enemy.image = self.ENEMY
+                            enemy.image = self.ENEMY_IMAGE
                         elif enemy.prev_x > enemy.rect.x:
                             enemy.image = self.ENEMY_REVERSED
 
