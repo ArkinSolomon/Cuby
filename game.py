@@ -30,17 +30,18 @@ class Game(object):
         self.PARALAX_RATIO = 3
 
         # Sounds
-        self.JUMP_ENEMY = pygame.mixer.Sound('jump_enemy.wav')
-        self.JUMP = pygame.mixer.Sound('jump.wav')
+        self.JUMP_ENEMY = pygame.mixer.Sound('audio/jump_enemy.wav')
+        self.JUMP = pygame.mixer.Sound('audio/jump.wav')
 
         # Load images
-        self.ENEMY_IMAGE = pygame.image.load('enemy.png')
-        self.ENEMY_REVERSED = pygame.image.load('enemy_reversed.png')
-        self.PLAYER_SLAMMING_REVERSED = pygame.image.load('player_slamming_reversed.png')
-        self.PLAYER_SLAMMING = pygame.image.load('player_slamming.png')
-        self.PLAYER_REVERSED = pygame.image.load('player_reversed.png')
-        self.PLAYER_IMAGE = pygame.image.load('player.png')
-        self.SUN = pygame.image.load('sun.png')
+        self.ENEMY_IMAGE = pygame.image.load('images/enemy.png')
+        self.ENEMY_REVERSED = pygame.image.load('images/enemy_reversed.png')
+        self.ENEMY_DEAD = pygame.image.load('images/enemy_dead.png')
+        self.PLAYER_SLAMMING_REVERSED = pygame.image.load('images/player_slamming_reversed.png')
+        self.PLAYER_SLAMMING = pygame.image.load('images/player_slamming.png')
+        self.PLAYER_REVERSED = pygame.image.load('images/player_reversed.png')
+        self.PLAYER_IMAGE = pygame.image.load('images/player.png')
+        self.SUN = pygame.image.load('images/sun.png')
 
         if self.VERBOSE: print 'Game initialized'
 
@@ -273,7 +274,7 @@ class Game(object):
                         if player.is_slamming:
                             if not enemy.is_in_air:
                                 enemy.kill_by_player()
-                                enemy.image = pygame.image.load('enemy_dead.png')
+                                enemy.image = self.ENEMY_DEAD
                             else:
                                 enemy.rect.top = player.rect.bottom
                         else:

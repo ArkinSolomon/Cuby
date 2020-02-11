@@ -22,7 +22,7 @@ class Player(pygame.sprite.Sprite):
         self.direction = 'r'
 
         # Initialize player
-        self.image = pygame.image.load('player.png')
+        self.image = pygame.image.load('images/player.png')
         pygame.draw.rect(self.screen, self.color, [self.pos[0], self.pos[1], 150, 150], 0)
         self.rect = self.image.get_rect()
         self.rect.x = self.pos[0]

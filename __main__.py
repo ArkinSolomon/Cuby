@@ -40,7 +40,7 @@ pygame.init()
 if VERBOSE: print 'Pygame initialized'
 screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN | pygame.HWSURFACE)
 
-LOGO = pygame.image.load('logo.png')
+LOGO = pygame.image.load('images/logo.png')
 
 # Update level in file
 def __update_level_file(c):
@@ -139,7 +139,7 @@ def update(m):
 
 # Main menu
 pygame.display.set_caption('Cuby')
-pygame.mixer.music.load('cube_music.wav')
+pygame.mixer.music.load('audio/cube_music.wav')
 pygame.mixer.music.play(-1)
 
 screen_x, screen_y = pygame.display.get_surface().get_size()
@@ -200,7 +200,7 @@ while main_menu_is_active:
             __quit()
 
     screen.fill(pygame.Color('lightblue'))
-    screen.blit(pygame.image.load('sun.png'), (50, 50))
+    screen.blit(pygame.image.load('images/sun.png'), (50, 50))
 
     clouds.draw(screen)
     clouds_2.draw(screen)

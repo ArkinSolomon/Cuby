@@ -18,7 +18,7 @@ class Enemy(pygame.sprite.Sprite):
 
         # Initialize sprite
         self.image = pygame.Surface((75, 75), pygame.SRCALPHA)
-        self.image.blit(pygame.image.load('enemy.png'), self.image.get_rect())
+        self.image.blit(pygame.image.load('images/enemy.png'), self.image.get_rect())
         self.rect = self.image.get_rect()
         self.rect.x = self.pos[0]
         self.prev_x = self.pos[0]
