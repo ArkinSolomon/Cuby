@@ -1,4 +1,6 @@
 from distutils.core import setup
+from glob import glob
 import py2exe
 
-setup(console=['__main__.py'])
+data_files = [('images', glob('images/*.*')), ('audio', glob('audio/*.*')), ('levels', glob('levels/*.*'))]
+setup(console=['__main__.py'], data_files=data_files)

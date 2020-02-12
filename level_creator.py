@@ -153,7 +153,7 @@ class Level_Creator(object):
 
             # Draw sky
             screen.fill(pygame.Color('lightblue'))
-            screen.blit(pygame.image.load('sun.png'), (50, 50))
+            screen.blit(pygame.image.load('images/sun.png'), (50, 50))
 
             # Draw and offset platforms
             for sprite in all_sprites:
@@ -173,7 +173,7 @@ class Level_Creator(object):
 
             if self.player_start != None:
                 s = pygame.Surface((150, 150))
-                s.blit(pygame.image.load('player.png'), s.get_rect())
+                s.blit(pygame.image.load('images/player.png'), s.get_rect())
                 screen.blit(s, [self.player_start[0] - self.offset[0], self.player_start[1] - self.offset[1]])
 
             if self.ending != None:
@@ -185,7 +185,7 @@ class Level_Creator(object):
             if self.type == Creation_Type.PLAYER:
                 s = pygame.Surface((150, 150))
                 s.set_alpha(128)
-                s.blit(pygame.image.load('player.png'), s.get_rect())
+                s.blit(pygame.image.load('images/player.png'), s.get_rect())
                 screen.blit(s, mouse_pos)
             elif self.is_checking_for_mouse_up_event and self.type == Creation_Type.PLATFORM:
 
@@ -201,7 +201,7 @@ class Level_Creator(object):
             elif self.type == Creation_Type.ENEMY:
                 s = pygame.Surface((75, 75), pygame.SRCALPHA)
                 s.set_alpha(128)
-                s.blit(pygame.image.load('enemy.png'), s.get_rect())
+                s.blit(pygame.image.load('images/enemy.png'), s.get_rect())
                 screen.blit(s, mouse_pos)
             elif self.type == Creation_Type.ENDING:
                 s = pygame.Surface((200, 200))
