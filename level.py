@@ -5,7 +5,7 @@ Each instance of this class represents a group of platforms and clouds. This is 
 '''
 class Level(object):
 
-    def __init__(self, screen):
+    def __init__(self, screen, NOAUDIO):
         super(Level, self).__init__()
 
         self.level_group = pygame.sprite.Group()
@@ -17,7 +17,10 @@ class Level(object):
         self.unlocked = False
         self.first_loop_check = True
 
-        self.UNLOCK_SOUND = pygame.mixer.Sound('exit_unlock.wav')
+        self.NOAUDIO = NOAUDIO
+
+        if not self.NOAUDIO:
+            self.UNLOCK_SOUND = pygame.mixer.Sound('audio/exit_unlock.wav')
 
         self.screen_x, self.screen_y = pygame.display.get_surface().get_size()
         self.screen_rect = pygame.Rect(0, 0, self.screen_x, self.screen_y)
@@ -69,7 +72,7 @@ class Level(object):
             return
         if self.enemy_count <= 0 and not self.unlocked:
             self.unlocked = True
-            self.UNLOCK_SOUND.play()
+            if not self.NOAUDIO: self.UNLOCK_SOUND.play()
             self.ending.unlock()
 
     def set_clouds(self, cloud_group):

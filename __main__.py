@@ -35,12 +35,17 @@ if '-l' in sys.argv or '--level' in sys.argv:
         level_override = int(sys.argv[sys.argv.index('-l') + 1])
 DEBUG = True if '-d' in sys.argv or '--debug' in sys.argv else False
 if DEBUG: print 'Debugging Cuby'
+NOAI = True if '--no-ai' in sys.argv else False
+if NOAI: print 'Starting game with enemy AI disabled'
+NOAUDIO = True if '--no-audio' in sys.argv else False
+if NOAUDIO: print 'Starting game with audio disabled'
 
 pygame.init()
 if VERBOSE: print 'Pygame initialized'
 screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN | pygame.HWSURFACE)
 
 LOGO = pygame.image.load('images/logo.png')
+SUN = pygame.image.load('images/sun.png')
 
 # Update level in file
 def __update_level_file(c):
@@ -75,7 +80,7 @@ def parse_levels():
                 if VERBOSE: 'Parsing new level'
                 lines = l.split('\n')
                 del lines[len(lines) - 1]
-                level = Level(screen)
+                level = Level(screen, NOAUDIO)
 
                 for line in lines:
                     if VERBOSE: print 'Parsing line: %s' % line
@@ -139,8 +144,9 @@ def update(m):
 
 # Main menu
 pygame.display.set_caption('Cuby')
-pygame.mixer.music.load('audio/cube_music.wav')
-pygame.mixer.music.play(-1)
+if not NOAUDIO:
+    pygame.mixer.music.load('audio/cube_music.wav')
+    pygame.mixer.music.play(-1)
 
 screen_x, screen_y = pygame.display.get_surface().get_size()
 button_width = screen_x * .33
@@ -183,7 +189,7 @@ while main_menu_is_active:
                 current_level = 0
                 if VERBOSE: print 'Currrent level higher than max levels, reseting to 0'
             if VERBOSE: print 'Starting game at level %d' % (current_level + 1)
-            Game(__levels, update, VERBOSE, DEBUG).start(screen)
+            Game(__levels, update, VERBOSE, DEBUG, NOAI, NOAUDIO).start(screen)
             pygame.mouse.set_visible(True)
             __levels = []
             parse_levels()
@@ -200,7 +206,7 @@ while main_menu_is_active:
             __quit()
 
     screen.fill(pygame.Color('lightblue'))
-    screen.blit(pygame.image.load('images/sun.png'), (50, 50))
+    screen.blit(SUN, (50, 50))
 
     clouds.draw(screen)
     clouds_2.draw(screen)

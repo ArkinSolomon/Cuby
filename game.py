@@ -13,12 +13,14 @@ This Class is the game itself. All of the different game classes come together h
 class Game(object):
 
     # Class initializer
-    def __init__(self, levels, update, verbose, debug):
+    def __init__(self, levels, update, VERBOSE, DEBUG, NOAI, NOAUDIO):
         super(Game, self).__init__()
         self.levels = levels
         self.update = update
-        self.VERBOSE = verbose
-        self.DEBUG = debug
+        self.VERBOSE = VERBOSE
+        self.DEBUG = DEBUG
+        self.NOAI = NOAI
+        self.NOAUDIO = NOAUDIO
 
         self.free_camera_movement = False
         self.total_free_camera_offset_x = 0
@@ -30,8 +32,9 @@ class Game(object):
         self.PARALAX_RATIO = 3
 
         # Sounds
-        self.JUMP_ENEMY = pygame.mixer.Sound('audio/jump_enemy.wav')
-        self.JUMP = pygame.mixer.Sound('audio/jump.wav')
+        if not self.NOAUDIO:
+            self.JUMP_ENEMY = pygame.mixer.Sound('audio/jump_enemy.wav')
+            self.JUMP = pygame.mixer.Sound('audio/jump.wav')
 
         # Load images
         self.ENEMY_IMAGE = pygame.image.load('images/enemy.png')
@@ -66,6 +69,9 @@ class Game(object):
             player_group = pygame.sprite.Group()
             player_group.add(player)
             self.game_is_running = True
+            if (self.NOAI):
+                level.disable_ai()
+                print 'Game starting with enemy AI disabled'
             if self.VERBOSE: print 'Level initialized'
 
             # Make clouds
@@ -128,7 +134,9 @@ class Game(object):
 
                     # Move vertically
                     enemy.prev_y = enemy.rect.y
-                    if is_x_collide and enemy.is_enabled and enemy.has_ai: enemy.jump()
+                    if is_x_collide and enemy.is_enabled and enemy.has_ai:
+                        enemy.jump()
+                        if not self.NOAUDIO: self.JUMP_ENEMY.play()
                     enemy.vertical_acceleration += self.GRAVITY
                     enemy.rect.y += enemy.vertical_acceleration
                     if enemy.is_enabled:
@@ -247,7 +255,7 @@ class Game(object):
 
                 # Vertical logic
                 if (keys[pygame.K_w] or keys[pygame.K_SPACE]) and not player.is_in_air and not player.is_slamming and not self.free_camera_movement:
-                    self.JUMP.play()
+                    if not self.NOAUDIO: self.JUMP.play()
                     player.vertical_acceleration -= 9
                     player.is_in_air = True
 
@@ -313,8 +321,10 @@ class Game(object):
                     # Start or stop enemy movement
                     if keys[pygame.K_MINUS]:
                         level.disable_ai()
+                        self.NOAI = True
                     if keys[pygame.K_EQUALS]:
                         level.enable_ai()
+                        self.NOAI = False
 
                     # Start or stop free camera movement
                     if keys[pygame.K_F1] and not self.free_camera_movement:
