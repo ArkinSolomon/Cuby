@@ -9,9 +9,10 @@ from button import Button
 
 class Level_Creator(object):
 
-    def __init__(self, verbose):
+    def __init__(self, VERBOSE, SHOW_FPS):
         super(Level_Creator, self).__init__()
-        self.VERBOSE = verbose
+        self.VERBOSE = VERBOSE
+        self.SHOW_FPS = SHOW_FPS
 
         self.ON_KEY_PRESS_CHANGE_BY_VALUE = 10
 
@@ -23,12 +24,22 @@ class Level_Creator(object):
         self.initial_mouse_pos = None
         self.final_mouse_pos = None
         self.type = Creation_Type.PLATFORM
+        self.FPS = 60
 
         self.player_start = None
         self.sprites = pygame.sprite.Group()
         self.enemies = pygame.sprite.Group()
         self.objects = pygame.sprite.Group()
         self.ending = None
+
+        # Load images
+        self.ENEMY_IMAGE = pygame.image.load('images/enemy.png')
+        self.PLAYER_IMAGE = pygame.image.load('images/player.png')
+        self.SUN = pygame.image.load('images/sun.png')
+
+        self.fps_font = pygame.font.Font(pygame.font.get_default_font(), 20)
+
+        if self.VERBOSE: print 'Level Creator initialized'
 
     def start(self, screen):
 
@@ -49,6 +60,7 @@ class Level_Creator(object):
         self.set_object_button = Button([button_x, button_y], BUTTON_SIZE, BUTTON_SIZE, 'Object', 25, screen)
 
         self.save_button = Button([self.screen_x - 360, button_y], BUTTON_SIZE, BUTTON_SIZE, 'Save', 30, screen)
+        self.save_button.disabled = True
         self.cancel_buttton = Button([self.screen_x - 180, button_y], BUTTON_SIZE, BUTTON_SIZE, 'Cancel', 30, screen)
 
         while self.level_creator_is_active:
@@ -58,6 +70,8 @@ class Level_Creator(object):
             all_sprites = self.sprites.copy()
             all_sprites.add(self.enemies)
             all_sprites.add(self.objects)
+
+            if self.save_button.disabled and self.player_start and self.ending and len(self.sprites) > 0: self.save_button.disabled = False
 
             # Handle events
             for event in pygame.event.get():
@@ -153,7 +167,7 @@ class Level_Creator(object):
 
             # Draw sky
             screen.fill(pygame.Color('lightblue'))
-            screen.blit(pygame.image.load('images/sun.png'), (50, 50))
+            screen.blit(self.SUN, (50, 50))
 
             # Draw and offset platforms
             for sprite in all_sprites:
@@ -173,7 +187,7 @@ class Level_Creator(object):
 
             if self.player_start != None:
                 s = pygame.Surface((150, 150))
-                s.blit(pygame.image.load('images/player.png'), s.get_rect())
+                s.blit(self.PLAYER_IMAGE, s.get_rect())
                 screen.blit(s, [self.player_start[0] - self.offset[0], self.player_start[1] - self.offset[1]])
 
             if self.ending != None:
@@ -185,7 +199,7 @@ class Level_Creator(object):
             if self.type == Creation_Type.PLAYER:
                 s = pygame.Surface((150, 150))
                 s.set_alpha(128)
-                s.blit(pygame.image.load('images/player.png'), s.get_rect())
+                s.blit(self.PLAYER_IMAGE, s.get_rect())
                 screen.blit(s, mouse_pos)
             elif self.is_checking_for_mouse_up_event and self.type == Creation_Type.PLATFORM:
 
@@ -201,7 +215,7 @@ class Level_Creator(object):
             elif self.type == Creation_Type.ENEMY:
                 s = pygame.Surface((75, 75), pygame.SRCALPHA)
                 s.set_alpha(128)
-                s.blit(pygame.image.load('images/enemy.png'), s.get_rect())
+                s.blit(self.ENEMY_IMAGE, s.get_rect())
                 screen.blit(s, mouse_pos)
             elif self.type == Creation_Type.ENDING:
                 s = pygame.Surface((200, 200))
@@ -222,8 +236,10 @@ class Level_Creator(object):
             self.save_button.draw()
             self.cancel_buttton.draw()
 
+            if self.SHOW_FPS: screen.blit(self.fps_font.render(str(int(clock.get_fps())), True, pygame.Color('white'), pygame.Color('black')), (0, 0))
+
             pygame.display.flip()
-            clock.tick(60)
+            clock.tick(self.FPS)
 
     def __calculate_top_left(self, pos):
         top_left = [0, 0]
@@ -243,5 +259,4 @@ class Level_Creator(object):
     def stop(self):
         if self.VERBOSE: print 'Halt signal recieved, creator closing'
         self.level_creator_is_active = False
-        pygame.quit()
-        sys.exit(0)
+        return

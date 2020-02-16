@@ -6,7 +6,7 @@ Cuby is a game in where you, a cube, must defeat all the evil circles with poiso
 
 ## Installation:
 
-Compiled exe files will be found under the 'releases' tab in GitHub. Unzip the folder and run `Cuby.exe`. You may need to [download and install Microsoft's Visual C++](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads). It can also be run directly from the command line by downloading the source using Python 2.7. Running it from the command line provides additional command line arguments, `-v` or `--verbose` prints verbose output. `-d` or `--debug` enables debug keys (found below). `-l <level>` or `--level <level>` forces the game to start from a specific level. `--no-ai` starts the game and does not enable enemy AI (It can be enabled using debug keys). `--no-audio` does not enable audio.
+Compiled exe files will be found under the 'releases' tab in GitHub. Unzip the folder and run `Cuby.exe`. You may need to [download and install Microsoft's Visual C++](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads). It can also be run directly from the command line by downloading the source using Python 2.7. Running it from the command line provides additional command line arguments, `-v` or `--verbose` prints verbose output. `-d` or `--debug` enables debug keys (found below). `-f` or `--show-fps` shows the current game fps in the top-left corner of the screen. `-l <level>` or `--level <level>` forces the game to start from a specific level. `--no-ai` starts the game and does not enable enemy AI (It can be enabled using debug keys). `--no-audio` does not enable audio. 
 You will need these modules if you run it using Python:
 - Pygame
 - Pathlib

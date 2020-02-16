@@ -13,7 +13,7 @@ This Class is the game itself. All of the different game classes come together h
 class Game(object):
 
     # Class initializer
-    def __init__(self, levels, update, VERBOSE, DEBUG, NOAI, NOAUDIO):
+    def __init__(self, levels, update, VERBOSE, DEBUG, NOAI, NOAUDIO, SHOW_FPS):
         super(Game, self).__init__()
         self.levels = levels
         self.update = update
@@ -21,6 +21,10 @@ class Game(object):
         self.DEBUG = DEBUG
         self.NOAI = NOAI
         self.NOAUDIO = NOAUDIO
+        self.SHOW_FPS = SHOW_FPS
+
+        self.total_offset_x = 0
+        self.total_offset_y = 0
 
         self.free_camera_movement = False
         self.total_free_camera_offset_x = 0
@@ -45,6 +49,8 @@ class Game(object):
         self.PLAYER_REVERSED = pygame.image.load('images/player_reversed.png')
         self.PLAYER_IMAGE = pygame.image.load('images/player.png')
         self.SUN = pygame.image.load('images/sun.png')
+
+        self.fps_font = pygame.font.Font(pygame.font.get_default_font(), 20)
 
         if self.VERBOSE: print 'Game initialized'
 
@@ -72,13 +78,25 @@ class Game(object):
             if (self.NOAI):
                 level.disable_ai()
                 print 'Game starting with enemy AI disabled'
-            if self.VERBOSE: print 'Level initialized'
+
+            # Create rectangles for lives (I just felt like using long variable names)
+            life_rect_size = 20
+            life_rect_distance_from_edges_of_screen = 10
+            life_rect_x_gap = 10
+            current_top_left_of_life_rect = [screen_x - life_rect_distance_from_edges_of_screen - life_rect_size, life_rect_distance_from_edges_of_screen]
+            life_rects = []
+            for _ in range(player.lives):
+                life_rect = pygame.Rect(current_top_left_of_life_rect, (life_rect_size, life_rect_size))
+                life_rects.append(life_rect)
+                current_top_left_of_life_rect[0] -= life_rect_x_gap + life_rect_size
 
             # Make clouds
             level.set_clouds(Cloud(screen, self.SCREEN_SIZE[0], self.SCREEN_SIZE[1], horizontal_constraints, vertical_constraints, self.VERBOSE).clouds)
 
+            if self.VERBOSE: print 'Level initialized'
+
             # Main game loop
-            if self.VERBOSE: print 'Initializing main game loop'
+            if self.VERBOSE: print 'Starting main game loop'
             while self.game_is_running:
 
                 # Handle events
@@ -113,14 +131,14 @@ class Game(object):
                                 enemy.rect.x -= abs(enemy.speed)
 
                         # Loop through all horizontal collisions
-                        collisions = pygame.sprite.spritecollide(enemy, level.level_group, False) + pygame.sprite.spritecollide(enemy, player_group, False) + pygame.sprite.spritecollide(enemy, exclusive_enemy_group, False) + pygame.sprite.spritecollide(enemy, level.objects, False)
-                        for collision in collisions:
-                            if isinstance(collision, Enemy) and not collision.is_enabled: continue
-                            if not is_x_collide and not isinstance(collision, Enemy): is_x_collide = True
-                            if enemy.prev_x < enemy.rect.x:
-                                enemy.rect.right = collision.rect.left
-                            elif enemy.prev_x > enemy.rect.x:
-                                enemy.rect.left = collision.rect.right
+                        collisions = pygame.sprite.spritecollide(enemy, level.objects, False) + pygame.sprite.spritecollide(enemy, level.objects, False)
+                        if enemy.is_enabled and len(collisions) > 0:
+                            is_x_collide = True
+                            for collision in collisions:
+                                if enemy.rect.x > enemy.prev_x:
+                                    enemy.rect.right = collision.rect.left
+                                elif enemy.rect.x < enemy.prev_x:
+                                    enemy.rect.left = collision.rect.right
 
                         # Bound to constraints
                         if enemy.rect.left < horizontal_constraints[0]:
@@ -437,6 +455,10 @@ class Game(object):
                         object.rect.x += offset_x
                         object.rect.y += offset_y
 
+                    # Add to total
+                    self.total_offset_x += offset_x
+                    self.total_offset_y += offset_y
+
                 # Check if level passed
                 level.update()
                 if player.rect.colliderect(level.ending.rect) and not level.ending.locked:
@@ -445,9 +467,37 @@ class Game(object):
 
                 # Check if player died
                 if player.rect.top > vertical_constraints[1]:
-                    player.kill()
-                    if self.VERBOSE: print 'Player died. Gameplay stopped, returning to main menu.'
-                    return
+                    if player.lives <= 0:
+                        player.kill()
+                        if self.VERBOSE: print 'Player died. Gameplay stopped, returning to main menu.'
+                        return
+                    else:
+                        player.lives -= 1
+                        life_rects.pop()
+                        if self.VERBOSE: print 'Player died. %d lives remaining.' % player.lives
+                        horizontal_constraints[0] -= self.total_offset_x
+                        horizontal_constraints[1] -= self.total_offset_x
+                        level.ending.rect.x -= self.total_offset_x
+                        vertical_constraints[0] -= self.total_offset_y
+                        vertical_constraints[1] -= self.total_offset_y
+                        level.ending.rect.y -= self.total_offset_y
+                        for cloud in level.clouds:
+                            cloud.rect.x -= self.total_offset_x / self.PARALAX_RATIO
+                            cloud.rect.y -= self.total_offset_y / self.PARALAX_RATIO
+                        for platform_sprite in level.level_group:
+                            platform_sprite.rect.x -= self.total_offset_x
+                            platform_sprite.rect.y -= self.total_offset_y
+                        for enemy in level.enemies:
+                            enemy.rect.x -= self.total_offset_x
+                            enemy.rect.y -= self.total_offset_y
+                        for object in level.objects:
+                            object.rect.x -= self.total_offset_x
+                            object.rect.y -= self.total_offset_y
+                        player.rect.x = level.player_start[0]
+                        player.rect.y = level.player_start[1]
+                        player.vertical_acceleration = 0
+                        self.total_offset_x = 0
+                        self.total_offset_y = 0
 
                 '''
                 All game drawing
@@ -464,10 +514,19 @@ class Game(object):
                 # Draw health bar
                 health_bar_size = 20
                 health_bar_multiplier = 5
+                health_bar_border = 5
                 health_bar_x = (screen_x / 2) - (health_bar_multiplier * 100)
                 health_bar_y = screen_y - health_bar_size
-                health_rect = pygame.Rect(health_bar_x, health_bar_y, health_bar_multiplier * player.health, health_bar_size)
+                health_rect_background = pygame.Rect(health_bar_x - health_bar_border, health_bar_y - (health_bar_border * 2) - 2, (health_bar_multiplier * player.max_health) + (health_bar_border * 2), health_bar_size + (health_bar_border * 2))
+                health_rect = pygame.Rect(health_bar_x, health_bar_y - health_bar_border - 2, health_bar_multiplier * player.health, health_bar_size)
+                pygame.draw.rect(screen, (0, 0, 0), health_rect_background, 0)
                 pygame.draw.rect(screen, pygame.Color('red'), health_rect, 0)
+
+                # Draw life rects
+                for life_rect in life_rects:
+                    pygame.draw.rect(screen, (32, 177, 75), life_rect)
+
+                if self.SHOW_FPS: screen.blit(self.fps_font.render(str(int(clock.get_fps())), True, pygame.Color('white'), pygame.Color('black')), (0, 0))
 
                 # Update display
                 pygame.display.flip()

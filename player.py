@@ -16,10 +16,12 @@ class Player(pygame.sprite.Sprite):
         self.screen = screen
         self.color = pygame.Color('lightgreen')
         self.is_in_air = False
-        self.health = 200
+        self.max_health = 200
+        self.health = self.max_health
         self.is_slamming = False
         self.drawn = False
         self.direction = 'r'
+        self.lives = 3
 
         # Initialize player
         self.image = pygame.image.load('images/player.png')

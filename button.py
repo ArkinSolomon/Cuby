@@ -11,7 +11,7 @@ class Button(pygame.sprite.Sprite):
         self.coords = coords
 
         self.font = pygame.font.SysFont('Comic Sans MS', size)
-        self.text = self.font.render(text, False, (0, 0, 0))
+        self.text = self.font.render(text, True, (0, 0, 0))
         self.t = text
         self.disabled = False
 

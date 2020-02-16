@@ -15,7 +15,7 @@ class Ending(pygame.sprite.Sprite):
         self.screen = screen
         self.drawn = False
 
-        # Initialize platform
+        # Initialize sprite
         self.image = pygame.Surface(self.size)
         self.image.fill(self.color)
         pygame.draw.rect(self.screen, self.color, [coords[0], coords[1], self.size[0], self.size[1]])
