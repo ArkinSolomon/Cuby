@@ -37,7 +37,7 @@ class Level_Creator(object):
         self.PLAYER_IMAGE = pygame.image.load('images/player.png')
         self.SUN = pygame.image.load('images/sun.png')
 
-        self.fps_font = pygame.font.Font(pygame.font.get_default_font(), 20)
+        self.fps_font = pygame.font.Font('fonts/FreeSansBold.ttf', 20)
 
         if self.VERBOSE: print 'Level Creator initialized'
 

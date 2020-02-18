@@ -188,7 +188,7 @@ cloud_counter = 0
 clock = pygame.time.Clock()
 
 # Font things
-fps_font = pygame.font.Font(pygame.font.get_default_font(), 20)
+fps_font = pygame.font.Font('fonts/FreeSansBold.ttf', 20)
 version_font = pygame.font.SysFont('Comic Sans MS', 16)
 version_data = 'Cuby %s' % VERSION
 version_size = version_font.size(version_data)
