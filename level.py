@@ -19,8 +19,7 @@ class Level(object):
 
         self.NOAUDIO = NOAUDIO
 
-        if not self.NOAUDIO:
-            self.UNLOCK_SOUND = pygame.mixer.Sound('audio/exit_unlock.wav')
+        if not self.NOAUDIO: self.UNLOCK_SOUND = pygame.mixer.Sound('audio/exit_unlock.wav')
 
         self.screen_x, self.screen_y = pygame.display.get_surface().get_size()
         self.screen_rect = pygame.Rect(0, 0, self.screen_x, self.screen_y)
