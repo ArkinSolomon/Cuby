@@ -71,7 +71,7 @@ class Level_Creator(object):
             all_sprites.add(self.enemies)
             all_sprites.add(self.objects)
 
-            if self.save_button.disabled and self.player_start and self.ending and len(self.sprites) > 0: self.save_button.disabled = False
+            if self.save_button.disabled and self.player_start is not None and self.ending is not None and len(self.sprites) > 0: self.save_button.disabled = False
 
             # Handle events
             for event in pygame.event.get():
@@ -176,10 +176,7 @@ class Level_Creator(object):
 
             all_sprites.draw(screen)
 
-            if len(all_sprites) == 0:
-                self.save_button.disabled = True
-            else:
-                self.save_button.disabled = False
+            if len(all_sprites) == 0: self.save_button.disabled = True
 
             for sprite in all_sprites:
                 sprite.rect.x += self.offset[0]

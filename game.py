@@ -51,6 +51,7 @@ class Game(object):
         self.PLAYER_IMAGE = pygame.image.load('images/player.png')
         self.SUN = pygame.image.load('images/sun.png')
 
+        # Load fonts
         self.fps_font = pygame.font.Font('fonts/FreeSansBold.ttf', 20)
 
         if self.VERBOSE: print 'Game initialized'
@@ -108,8 +109,6 @@ class Game(object):
                         if self.VERBOSE: print 'Gameplay stopped, returning to main menu'
                         return
 
-                is_player_enemy_collide = False
-
                 '''
                 Game logic
                 '''
@@ -153,6 +152,7 @@ class Game(object):
                     if enemy.is_enabled:
                         collisions = pygame.sprite.spritecollide(enemy, level.level_group, False) + pygame.sprite.spritecollide(enemy, exclusive_enemy_group, False) + pygame.sprite.spritecollide(enemy, player_group, False) + pygame.sprite.spritecollide(enemy, level.objects, False)
                         for collision in collisions:
+                            if isinstance(collision, Player): is_collide = True
                             if enemy.prev_x > enemy.rect.x:
                                 enemy.rect.left = collision.rect.right
                             elif enemy.prev_x < enemy.rect.x:
@@ -172,6 +172,7 @@ class Game(object):
                     if enemy.is_enabled:
                         collisions = pygame.sprite.spritecollide(enemy, level.level_group, False) + pygame.sprite.spritecollide(enemy, level.objects, False)  + pygame.sprite.spritecollide(enemy, exclusive_enemy_group, False) + pygame.sprite.spritecollide(enemy, player_group, False)
                         for collision in collisions:
+                            if isinstance(collision, Player): is_collide = True
                             if enemy.prev_y > enemy.rect.y:
                                 enemy.rect.top = collision.rect.bottom
                             elif enemy.prev_y < enemy.rect.y:
@@ -179,6 +180,9 @@ class Game(object):
                                 enemy.is_in_air = False
                             enemy.vertical_acceleration = 0
                         if enemy.vertical_acceleration != 0: enemy.is_in_air = True
+
+                    # Get rid of player health
+                    if is_collide: player.health -= 1
 
                 # Handle objects
                 for object in level.objects:
@@ -261,15 +265,14 @@ class Game(object):
                     if pygame.sprite.spritecollideany(enemy, level.objects, False) or pygame.sprite.spritecollideany(enemy, level.level_group, False):
                         enemy.rect.x = enemy_prev_x
                         player.rect.x = player.prev_x
-                if len(collisions) > 0: is_player_enemy_collide = True
 
                 # Move blocks
                 if not self.free_camera_movement:
                     for collision in pygame.sprite.spritecollide(player, level.objects, False):
-                        if key_d and not key_a:
+                        if player.prev_x < collision.rect.centerx:
                             player.rect.right = collision.rect.left
                             collision.delta = player.speed
-                        elif key_a and not key_d:
+                        elif player.prev_x > collision.rect.centerx:
                             player.rect.left = collision.rect.right
                             collision.delta = -player.speed
 
@@ -299,10 +302,10 @@ class Game(object):
 
                 # Loop through all vertical static collision
                 for collision in collisions:
-                    if player.prev_y < player.rect.y:
+                    if player.prev_y < collision.rect.centery:
                         player.rect.bottom = collision.rect.top
                         player.is_in_air = False
-                    else:
+                    elif player.prev_y > collision.rect.centery:
                         player.rect.top = collision.rect.bottom
                     player.vertical_acceleration = 0
                 if player.vertical_acceleration != 0: player.is_in_air = True
@@ -322,9 +325,6 @@ class Game(object):
                             player.is_in_air = False
                     elif player.prev_y > player.rect.y:
                         enemy.rect.bottom = player.rect.top
-                if len(collisions) > 0: is_player_enemy_collide = True
-
-                if is_player_enemy_collide: player.health -= 1
 
                 # Change player image depending on direcion moved
                 if player.prev_x < player.rect.x:
@@ -549,3 +549,6 @@ class Game(object):
 
         if self.VERBOSE: print 'Gameplay stopped, returning to main menu'
         return
+
+    def check_collide(self, sprite, group):
+        pass
