@@ -247,11 +247,7 @@ class Game(object):
                     player.rect.x -= player.speed
 
                 # Loop through all horizontal platform collisions
-                for collision in pygame.sprite.spritecollide(player, level.level_group, False):
-                    if key_d and not key_a and not self.free_camera_movement:
-                        player.rect.right = collision.rect.left
-                    elif key_a and not key_d and not self.free_camera_movement:
-                        player.rect.left = collision.rect.right
+                self.check_collide(player, level.level_group, 'x')
 
                 # Move enemies horizontally
                 collisions = pygame.sprite.spritecollide(player, level.enemies, False)
@@ -298,16 +294,9 @@ class Game(object):
                 player.vertical_acceleration += self.GRAVITY
                 player.rect.y += player.vertical_acceleration
 
-                collisions = pygame.sprite.spritecollide(player, level.level_group, False) + pygame.sprite.spritecollide(player, level.objects, False)
-
                 # Loop through all vertical static collision
-                for collision in collisions:
-                    if player.prev_y < collision.rect.centery:
-                        player.rect.bottom = collision.rect.top
-                        player.is_in_air = False
-                    elif player.prev_y > collision.rect.centery:
-                        player.rect.top = collision.rect.bottom
-                    player.vertical_acceleration = 0
+                self.check_collide(player, level.level_group, 'y')
+                self.check_collide(player, level.objects, 'y')
                 if player.vertical_acceleration != 0: player.is_in_air = True
 
                 # Loop through all vertical enemy collisions
@@ -409,23 +398,25 @@ class Game(object):
                     if key_s:
                         offset_y -= player.speed
 
-                self.total_free_camera_offset_x += offset_x
-                self.total_free_camera_offset_y += offset_y
+                    self.total_free_camera_offset_x += offset_x
+                    self.total_free_camera_offset_y += offset_y
 
                 # Move camera horizontally
                 if not self.free_camera_movement and player.rect.centerx > horizontal_constraints[0] + (self.SCREEN_SIZE[0] / 2) and player.rect.centerx < horizontal_constraints[1] - (self.SCREEN_SIZE[0] / 2):
                     if player.rect.x > player.prev_x:
-                        offset_x -= player.speed
-                        player.rect.x -= player.speed
-                        horizontal_constraints[0] -= player.speed
-                        horizontal_constraints[1] -= player.speed
-                        level.ending.rect.x -= player.speed
+                        s = player.rect.x - player.prev_x
+                        offset_x -= s
+                        player.rect.x -= s
+                        horizontal_constraints[0] -= s
+                        horizontal_constraints[1] -= s
+                        level.ending.rect.x -= s
                     elif player.rect.x < player.prev_x:
-                        offset_x += player.speed
-                        player.rect.x += player.speed
-                        horizontal_constraints[0] += player.speed
-                        horizontal_constraints[1] += player.speed
-                        level.ending.rect.x += player.speed
+                        s = player.prev_x - player.rect.x
+                        offset_x += s
+                        player.rect.x += s
+                        horizontal_constraints[0] += s
+                        horizontal_constraints[1] += s
+                        level.ending.rect.x += s
                 elif self.free_camera_movement:
                     player.rect.x += offset_x
                     horizontal_constraints[0] += offset_x
@@ -550,5 +541,20 @@ class Game(object):
         if self.VERBOSE: print 'Gameplay stopped, returning to main menu'
         return
 
-    def check_collide(self, sprite, group):
-        pass
+    def check_collide(self, sprite, group, dir):
+        collision = pygame.sprite.spritecollideany(sprite, group, False)
+        if collision:
+            if dir == 'x':
+                if sprite.prev_x < collision.rect.centerx:
+                    sprite.rect.right = collision.rect.left
+                elif sprite.prev_x > collision.rect.centerx:
+                    sprite.rect.left = collision.rect.right
+                self.check_collide(sprite, group, dir)
+            elif dir == 'y':
+                if sprite.prev_y < collision.rect.centery:
+                    sprite.rect.bottom = collision.rect.top
+                    sprite.is_in_air = False
+                elif sprite.prev_y > collision.rect.centery:
+                    sprite.rect.top = collision.rect.bottom
+                sprite.vertical_acceleration = 0
+        else: return
