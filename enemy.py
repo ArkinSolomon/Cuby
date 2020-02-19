@@ -28,4 +28,6 @@ class Enemy(pygame.sprite.Sprite):
     def jump(self):
         if not self.is_in_air: self.vertical_acceleration -= self.jump_power
 
-    def kill_by_player(self): self.is_enabled = False
+    def kill_by_player(self):
+        self.is_enabled = False
+        self.image = pygame.image.load('images/enemy_dead.png')
