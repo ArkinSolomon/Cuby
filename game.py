@@ -23,9 +23,11 @@ class Game(object):
         self.NOAUDIO = NOAUDIO
         self.SHOW_FPS = SHOW_FPS
 
+        # Total camera movement in both the x and y directions
         self.total_offset_x = 0
         self.total_offset_y = 0
 
+        # Free camera variables
         self.free_camera_movement = False
         self.total_free_camera_offset_x = 0
         self.total_free_camera_offset_y = 0
@@ -113,70 +115,8 @@ class Game(object):
 
                 # Loop through enemies
                 for enemy in level.enemies:
+                    pass
 
-                    is_player_x_collide = len(pygame.sprite.spritecollide(enemy, player_group, False)) > 0
-                    is_x_collide = False
-
-                    if enemy.is_enabled:
-
-                        exclusive_enemy_group = level.enemies.copy()
-                        exclusive_enemy_group.remove(enemy)
-
-                        # Move horizontally
-                        enemy.prev_x = enemy.rect.x
-                        if enemy.has_ai:
-                            if enemy.rect.centerx < player.rect.centerx:
-                                enemy.rect.x += abs(enemy.speed)
-                            elif enemy.rect.centerx > player.rect.centerx:
-                                enemy.rect.x -= abs(enemy.speed)
-
-                        # Loop through all horizontal collisions
-                        collisions = pygame.sprite.spritecollide(enemy, level.objects, False) + pygame.sprite.spritecollide(enemy, level.objects, False)
-                        if enemy.is_enabled and len(collisions) > 0:
-                            is_x_collide = True
-                            for collision in collisions:
-                                if enemy.rect.x > enemy.prev_x:
-                                    enemy.rect.right = collision.rect.left
-                                elif enemy.rect.x < enemy.prev_x:
-                                    enemy.rect.left = collision.rect.right
-
-                        # Bound to constraints
-                        if enemy.rect.left < horizontal_constraints[0]:
-                            enemy.rect.left = horizontal_constraints[0]
-                        if enemy.rect.right > horizontal_constraints[1]:
-                            enemy.rect.right = horizontal_constraints[1]
-                        if enemy.prev_x < enemy.rect.x:
-                            enemy.image = self.ENEMY_IMAGE
-                        elif enemy.prev_x > enemy.rect.x:
-                            enemy.image = self.ENEMY_REVERSED
-
-                    # Move vertically
-                    enemy.prev_y = enemy.rect.y
-                    if is_x_collide and enemy.is_enabled and enemy.has_ai:
-                        enemy.jump()
-                        if not self.NOAUDIO: self.JUMP_ENEMY.play()
-                    enemy.vertical_acceleration += self.GRAVITY
-                    enemy.rect.y += enemy.vertical_acceleration
-                    if enemy.is_enabled:
-
-                        collisions = pygame.sprite.spritecollide(enemy, level.level_group, False) + pygame.sprite.spritecollide(enemy, exclusive_enemy_group, False) + pygame.sprite.spritecollide(enemy, level.objects, False)
-
-                        # Loop through all vertical collisions
-                        is_player_y_collide = len(pygame.sprite.spritecollide(enemy, player_group, False)) > 0
-                        for collision in collisions:
-                            if isinstance(collision, Enemy) and not collision.is_enabled: continue
-                            if enemy.prev_y < enemy.rect.y:
-                                enemy.rect.bottom = collision.rect.top
-                                enemy.is_in_air = False
-                            elif enemy.prev_y > enemy.rect.y: enemy.rect.top = collision.rect.bottom
-                            enemy.vertical_acceleration = 0
-                        if enemy.vertical_acceleration != 0: enemy.is_in_air = True
-
-                    # Check if enemy died
-                    if enemy.rect.centery > vertical_constraints[1]:
-                        enemy.kill()
-                        continue
-                    if is_player_x_collide or is_player_y_collide and enemy.is_enabled: player.health -= 1
 
                 # Handle objects
                 for object in level.objects:
@@ -221,44 +161,42 @@ class Game(object):
                             object.rect.bottom = collision.rect.top
                             object.vertical_acceleration = 0
 
+                '''
+                Player logic
+                '''
+
+                # Keys pressed
+                keys = pygame.key.get_pressed()
+                key_w = True if keys[pygame.K_w] or keys[pygame.K_UP] else False
+                key_a = True if keys[pygame.K_a] or keys[pygame.K_LEFT] else False
+                key_s = True if keys[pygame.K_s] or keys[pygame.K_DOWN] else False
+                key_d = True if keys[pygame.K_d] or keys[pygame.K_RIGHT] else False
+                key_SPACE = keys[pygame.K_SPACE]
+
                 # Horizontal logic
                 player.prev_x = player.rect.x
-                keys = pygame.key.get_pressed()
-                if keys[pygame.K_d] and not self.free_camera_movement:
+                if key_d and not self.free_camera_movement:
                     player.rect.x += player.speed
-                if keys[pygame.K_a] and not self.free_camera_movement:
+                if key_a and not self.free_camera_movement:
                     player.rect.x -= player.speed
                 collisions = pygame.sprite.spritecollide(player, level.level_group, False)
 
                 # Loop through all horizontal platform collisions
                 for collision in collisions:
-                    if keys[pygame.K_d] and not keys[pygame.K_a] and not self.free_camera_movement:
+                    if key_d and not key_a and not self.free_camera_movement:
                         player.rect.right = collision.rect.left
-                    elif keys[pygame.K_a] and not keys[pygame.K_d] and not self.free_camera_movement:
+                    elif key_a and not key_d and not self.free_camera_movement:
                         player.rect.left = collision.rect.right
 
                 # Move blocks
                 if not self.free_camera_movement:
                     for collision in pygame.sprite.spritecollide(player, level.objects, False):
-                        if keys[pygame.K_d] and not keys[pygame.K_a]:
+                        if key_d and not key_a:
                             player.rect.right = collision.rect.left
                             collision.delta = player.speed
-                        elif keys[pygame.K_a] and not keys[pygame.K_d]:
+                        elif key_a and not key_d:
                             player.rect.left = collision.rect.right
                             collision.delta = -player.speed
-
-                # Move colliding enemies horizontally
-                for enemy in pygame.sprite.spritecollide(player, level.enemies, False):
-                    enemy_prev_pos = enemy.rect.x
-                    if keys[pygame.K_d] and not keys[pygame.K_a]:
-                        enemy.rect.left = player.rect.right
-                    elif keys[pygame.K_a] and not keys[pygame.K_d]:
-                        enemy.rect.right = player.rect.left
-                    if pygame.sprite.spritecollideany(enemy, level.level_group) != None or pygame.sprite.spritecollideany(enemy, level.objects) != None:
-                        enemy.rect.x = enemy_prev_pos
-                        player.rect.x = player.prev_x
-                    if enemy.rect.left < horizontal_constraints[0] or enemy.rect.right > horizontal_constraints[1]:
-                        enemy.kill_by_player()
 
                 # Bound to walls
                 if player.rect.left < horizontal_constraints[0]:
@@ -266,13 +204,13 @@ class Game(object):
                 if player.rect.right > horizontal_constraints[1]:
                     player.rect.right = horizontal_constraints[1]
 
-                if keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]:
+                if not self.free_camera_movement and (keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]):
                     player.vertical_acceleration += 4
                     player.is_slamming = True
                 else: player.is_slamming = False
 
                 # Vertical logic
-                if (keys[pygame.K_w] or keys[pygame.K_SPACE]) and not player.is_in_air and not player.is_slamming and not self.free_camera_movement:
+                if (key_w or key_SPACE) and not player.is_in_air and not player.is_slamming and not self.free_camera_movement:
                     if not self.NOAUDIO: self.JUMP.play()
                     player.vertical_acceleration -= 9
                     player.is_in_air = True
@@ -293,22 +231,6 @@ class Game(object):
                         player.rect.top = collision.rect.bottom
                     player.vertical_acceleration = 0
                 if player.vertical_acceleration != 0: player.is_in_air = True
-
-                # Handle enemy and player collisions
-                for enemy in pygame.sprite.spritecollide(player, level.enemies, False):
-                    if enemy.rect.top > player.rect.centery:
-                        if player.is_slamming:
-                            if not enemy.is_in_air:
-                                enemy.kill_by_player()
-                                enemy.image = self.ENEMY_DEAD
-                            else:
-                                enemy.rect.top = player.rect.bottom
-                        else:
-                            if not enemy.is_in_air:
-                                player.rect.bottom = enemy.rect.top
-                                player.is_in_air = False
-                            else:
-                                enemy.rect.top = player.rect.bottom
 
                 # Change player image depending on direcion moved
                 if player.prev_x < player.rect.x:
@@ -351,6 +273,8 @@ class Game(object):
                         self.free_camera_movement = True
                         print 'Free camera movement enabled'
                     if keys[pygame.K_F2] and self.free_camera_movement:
+
+                        # Reset camera
                         player.rect.x -= self.total_free_camera_offset_x
                         horizontal_constraints[0] -= self.total_free_camera_offset_x
                         horizontal_constraints[1] -= self.total_free_camera_offset_x
@@ -388,13 +312,13 @@ class Game(object):
                 offset_y = 0
 
                 if self.free_camera_movement:
-                    if keys[pygame.K_d]:
+                    if key_d:
                         offset_x -= player.speed
-                    if keys[pygame.K_a]:
+                    if key_a:
                         offset_x += player.speed
-                    if keys[pygame.K_w]:
+                    if key_w:
                         offset_y += player.speed
-                    if keys[pygame.K_s]:
+                    if key_s:
                         offset_y -= player.speed
 
                 self.total_free_camera_offset_x += offset_x
