@@ -397,6 +397,9 @@ class Game(object):
                         offset_y += player.speed
                     if key_s:
                         offset_y -= player.speed
+                    if keys[pygame.L_SHIFT] or keys[pygame.R_SHIFT]:
+                        offset_x *= 2
+                        offset_y *= 2
 
                     self.total_free_camera_offset_x += offset_x
                     self.total_free_camera_offset_y += offset_y

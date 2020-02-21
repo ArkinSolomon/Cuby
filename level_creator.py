@@ -43,6 +43,8 @@ class Level_Creator(object):
 
     def start(self, screen):
 
+        e_offset = 75 / 2
+
         clock = pygame.time.Clock()
         button_y = self.screen_y - 90
         BUTTON_SIZE = 90
@@ -90,13 +92,13 @@ class Level_Creator(object):
                     elif not self.prevent_dual_click and True not in button_clicks:
                         self.prevent_dual_click = True
                         if self.type == Creation_Type.PLAYER:
-                            self.player_start = [mouse_pos[0] + self.offset[0], mouse_pos[1] + self.offset[1]]
+                            self.player_start = [mouse_pos[0] + self.offset[0] - 75, mouse_pos[1] + self.offset[1] - 75]
                         elif self.type == Creation_Type.ENEMY:
-                            self.enemies.add(Enemy([mouse_pos[0] + self.offset[0], mouse_pos[1] + self.offset[1]], screen))
+                            self.enemies.add(Enemy([mouse_pos[0] + self.offset[0] - e_offset, mouse_pos[1] + self.offset[1] - e_offset], screen))
                         elif self.type == Creation_Type.ENDING:
-                            self.ending = [mouse_pos[0] + self.offset[0], mouse_pos[1] + self.offset[1]]
+                            self.ending = [mouse_pos[0] + self.offset[0] - 100, mouse_pos[1] + self.offset[1] - 100]
                         elif self.type == Creation_Type.OBJECT:
-                            self.objects.add(Movable_Object([mouse_pos[0] + self.offset[0], mouse_pos[1] + self.offset[1]]))
+                            self.objects.add(Movable_Object([mouse_pos[0] + self.offset[0] - 50, mouse_pos[1] + self.offset[1] - 50]))
                 if event.type == pygame.MOUSEBUTTONUP and (self.is_checking_for_mouse_up_event or self.prevent_dual_click):
                     if self.prevent_dual_click:
                         self.prevent_dual_click = False
@@ -197,7 +199,7 @@ class Level_Creator(object):
                 s = pygame.Surface((150, 150))
                 s.set_alpha(128)
                 s.blit(self.PLAYER_IMAGE, s.get_rect())
-                screen.blit(s, mouse_pos)
+                screen.blit(s, (mouse_pos[0] - 75, mouse_pos[1] - 75))
             elif self.is_checking_for_mouse_up_event and self.type == Creation_Type.PLATFORM:
 
                 top_left = self.__calculate_top_left(mouse_pos)
@@ -213,17 +215,17 @@ class Level_Creator(object):
                 s = pygame.Surface((75, 75), pygame.SRCALPHA)
                 s.set_alpha(128)
                 s.blit(self.ENEMY_IMAGE, s.get_rect())
-                screen.blit(s, mouse_pos)
+                screen.blit(s, (mouse_pos[0] - e_offset, mouse_pos[1] - e_offset))
             elif self.type == Creation_Type.ENDING:
                 s = pygame.Surface((200, 200))
                 s.set_alpha(128)
                 s.fill(pygame.Color('green'))
-                screen.blit(s, mouse_pos)
+                screen.blit(s, (mouse_pos[0] - 100, mouse_pos[1] - 100))
             elif self.type == Creation_Type.OBJECT:
                 s = pygame.Surface((100, 100))
                 s.set_alpha(128)
                 s.fill(pygame.Color('red'))
-                screen.blit(s, mouse_pos)
+                screen.blit(s, (mouse_pos[0] - 50, mouse_pos[1] - 50))
 
             self.set_player_start_button.draw()
             self.set_platform_button.draw()

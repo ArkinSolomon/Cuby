@@ -59,8 +59,8 @@ class Level(object):
             self.greatest_y = self.ending.rect.bottom
         if self.ending.rect.top < self.least_y:
             self.least_y = self.ending.rect.top
-        self.greatest_x += 150
-        self.least_x -= 150
+        self.greatest_x += 450
+        self.least_x -= 450
         self.greatest_y += 450
         self.least_y -= 450
 
