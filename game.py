@@ -98,8 +98,8 @@ class Game(object):
             level.set_clouds(Cloud(screen, self.SCREEN_SIZE[0], self.SCREEN_SIZE[1], horizontal_constraints, vertical_constraints, self.VERBOSE).clouds)
 
             # Calculate initial offset
-            self.initial_move_offset_x = -player_start[0]
-            self.initial_move_offset_y = -player_start[1]
+            self.initial_move_offset_x = -level.player_start[0]
+            self.initial_move_offset_y = -level.player_start[1]
 
             if self.VERBOSE: print 'Level initialized'
 
@@ -364,26 +364,7 @@ class Game(object):
                     if keys[pygame.K_F2] and self.free_camera_movement:
 
                         # Reset camera
-                        player.rect.x -= self.total_free_camera_offset_x
-                        horizontal_constraints[0] -= self.total_free_camera_offset_x
-                        horizontal_constraints[1] -= self.total_free_camera_offset_x
-                        level.ending.rect.x -= self.total_free_camera_offset_x
-                        player.rect.y -= self.total_free_camera_offset_y
-                        vertical_constraints[0] -= self.total_free_camera_offset_y
-                        vertical_constraints[1] -= self.total_free_camera_offset_y
-                        level.ending.rect.y -= self.total_free_camera_offset_y
-                        for cloud in level.clouds:
-                            cloud.rect.x -= self.total_free_camera_offset_x / self.PARALAX_RATIO
-                            cloud.rect.y -= self.total_free_camera_offset_y / self.PARALAX_RATIO
-                        for platform_sprite in level.level_group:
-                            platform_sprite.rect.x -= self.total_free_camera_offset_x
-                            platform_sprite.rect.y -= self.total_free_camera_offset_y
-                        for enemy in level.enemies:
-                            enemy.rect.x -= self.total_free_camera_offset_x
-                            enemy.rect.y -= self.total_free_camera_offset_y
-                        for object in level.objects:
-                            object.rect.x -= self.total_free_camera_offset_x
-                            object.rect.y -= self.total_free_camera_offset_y
+                        self.offset_sprites(level, horizontal_constraints, vertical_constraints, player, self.total_free_camera_offset_x, -self.total_free_camera_offset_y)
                         self.free_camera_movement = False
                         print 'Free camera movement disabled'
 
@@ -403,7 +384,7 @@ class Game(object):
                         offset_y += player.speed
                     if key_s:
                         offset_y -= player.speed
-                    if keys[pygame.L_SHIFT] or keys[pygame.R_SHIFT]:
+                    if keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]:
                         offset_x *= 2
                         offset_y *= 2
 
@@ -413,63 +394,19 @@ class Game(object):
                 # Move camera horizontally
                 if not self.free_camera_movement and player.rect.centerx > horizontal_constraints[0] + (self.SCREEN_SIZE[0] / 2) and player.rect.centerx < horizontal_constraints[1] - (self.SCREEN_SIZE[0] / 2):
                     if player.rect.x > player.prev_x:
-                        s = player.rect.x - player.prev_x
-                        offset_x -= s
-                        player.rect.x -= s
-                        horizontal_constraints[0] -= s
-                        horizontal_constraints[1] -= s
-                        level.ending.rect.x -= s
+                        offset_x += player.rect.x - player.prev_x
                     elif player.rect.x < player.prev_x:
-                        s = player.prev_x - player.rect.x
-                        offset_x += s
-                        player.rect.x += s
-                        horizontal_constraints[0] += s
-                        horizontal_constraints[1] += s
-                        level.ending.rect.x += s
-                elif self.free_camera_movement:
-                    player.rect.x += offset_x
-                    horizontal_constraints[0] += offset_x
-                    horizontal_constraints[1] += offset_x
-                    level.ending.rect.x += offset_x
+                        offset_x -= player.prev_x - player.rect.x
 
                 # Move camera vertically
                 if not self.free_camera_movement and player.rect.centery > vertical_constraints[0] + (self.SCREEN_SIZE[1] / 2) and player.rect.centery < vertical_constraints[1] - (self.SCREEN_SIZE[1] / 2) and player.prev_y != player.rect.y:
                     offset_y = self.SCREEN_SIZE[1] / 2 - player.rect.centery
-                    player.rect.y += offset_y
-                    vertical_constraints[0] += offset_y
-                    vertical_constraints[1] += offset_y
-                    level.ending.rect.y += offset_y
-                elif self.free_camera_movement:
-                    player.rect.y += offset_y
-                    vertical_constraints[0] += offset_y
-                    vertical_constraints[1] += offset_y
-                    level.ending.rect.y += offset_y
 
-                if offset_x != 0 or offset_y != 0:
+                self.offset_sprites(level, horizontal_constraints, vertical_constraints, player, offset_x, offset_y)
 
-                    # Loop through all clouds
-                    for cloud in level.clouds:
-                        cloud.rect.x += offset_x / self.PARALAX_RATIO
-                        cloud.rect.y += offset_y / self.PARALAX_RATIO
-
-                    # Loop through all of the level's platforms
-                    for platform_sprite in level.level_group:
-                        platform_sprite.rect.x += offset_x
-                        platform_sprite.rect.y += offset_y
-
-                    # Loop through all of the level's enemies
-                    for enemy in level.enemies:
-                        enemy.rect.x += offset_x
-                        enemy.rect.y += offset_y
-
-                    # Loop through all of the level's objects
-                    for object in level.objects:
-                        object.rect.x += offset_x
-                        object.rect.y += offset_y
-
-                    # Add to total
-                    self.total_offset_x += offset_x
-                    self.total_offset_y += offset_y
+                # Add to total
+                self.total_offset_x -= offset_x
+                self.total_offset_y += offset_y
 
                 # Check if level passed
                 level.update()
@@ -549,6 +486,36 @@ class Game(object):
 
         if self.VERBOSE: print 'Gameplay stopped, returning to main menu'
         return
+
+    # Offset all sprites in the level
+    def offset_sprites(self, level, horizontal_constraints, vertical_constraints, player, offset_x, offset_y):
+        if offset_x == 0 and offset_y == 0: return
+
+        # Horizontal single changes
+        player.rect.x -= offset_x
+        horizontal_constraints[0] -= offset_x
+        horizontal_constraints[1] -= offset_x
+        level.ending.rect.x -= offset_x
+
+        # Vertical single chagnes
+        player.rect.y += offset_y
+        vertical_constraints[0] += offset_y
+        vertical_constraints[1] += offset_y
+        level.ending.rect.y += offset_y
+
+        # Multi-sprite changes
+        for cloud in level.clouds:
+            cloud.rect.x -= offset_x / self.PARALAX_RATIO
+            cloud.rect.y += offset_y / self.PARALAX_RATIO
+        for sprite in level.level_group:
+            sprite.rect.x -= offset_x
+            sprite.rect.y += offset_y
+        for sprite in level.objects:
+            sprite.rect.x -= offset_x
+            sprite.rect.y += offset_y
+        for sprite in level.enemies:
+            sprite.rect.x -= offset_x
+            sprite.rect.y += offset_y
 
     def check_collide(self, sprite, group, dir):
         collision = pygame.sprite.spritecollideany(sprite, group, False)
