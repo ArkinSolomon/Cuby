@@ -26,6 +26,8 @@ class Game(object):
         # Total camera movement in both the x and y directions
         self.total_offset_x = 0
         self.total_offset_y = 0
+        self.initial_move_offset_x = 0
+        self.initial_move_offset_y = 0
 
         # Free camera variables
         self.free_camera_movement = False
@@ -94,6 +96,10 @@ class Game(object):
 
             # Make clouds
             level.set_clouds(Cloud(screen, self.SCREEN_SIZE[0], self.SCREEN_SIZE[1], horizontal_constraints, vertical_constraints, self.VERBOSE).clouds)
+
+            # Calculate initial offset
+            self.initial_move_offset_x = -player_start[0]
+            self.initial_move_offset_y = -player_start[1]
 
             if self.VERBOSE: print 'Level initialized'
 
