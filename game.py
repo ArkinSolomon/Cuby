@@ -29,11 +29,6 @@ class Game(object):
         self.initial_move_offset_x = 0
         self.initial_move_offset_y = 0
 
-        # Free camera variables
-        self.free_camera_movement = False
-        self.total_free_camera_offset_x = 0
-        self.total_free_camera_offset_y = 0
-
         # Constants
         self.GRAVITY = .19
         self.FPS = 60
@@ -98,8 +93,9 @@ class Game(object):
             level.set_clouds(Cloud(screen, self.SCREEN_SIZE[0], self.SCREEN_SIZE[1], horizontal_constraints, vertical_constraints, self.VERBOSE).clouds)
 
             # Calculate initial offset
-            self.initial_move_offset_x = -level.player_start[0]
-            self.initial_move_offset_y = -level.player_start[1]
+            self.initial_move_offset_x = (screen_x / 2) - level.player_start[0] - 75
+            self.initial_move_offset_y = (screen_y / 2) - level.player_start[1] - 75
+            self.offset_sprites(level, horizontal_constraints, vertical_constraints, player, self.initial_move_offset_x, self.initial_move_offset_y)
 
             if self.VERBOSE: print 'Level initialized'
 
@@ -247,9 +243,9 @@ class Game(object):
 
                 # Horizontal logic
                 player.prev_x = player.rect.x
-                if key_d and not self.free_camera_movement:
+                if key_d:
                     player.rect.x += player.speed
-                if key_a and not self.free_camera_movement:
+                if key_a:
                     player.rect.x -= player.speed
 
                 # Loop through all horizontal platform collisions
@@ -269,14 +265,13 @@ class Game(object):
                         player.rect.x = player.prev_x
 
                 # Move blocks
-                if not self.free_camera_movement:
-                    for collision in pygame.sprite.spritecollide(player, level.objects, False):
-                        if player.prev_x < collision.rect.centerx:
-                            player.rect.right = collision.rect.left
-                            collision.delta = player.speed
-                        elif player.prev_x > collision.rect.centerx:
-                            player.rect.left = collision.rect.right
-                            collision.delta = -player.speed
+                for collision in pygame.sprite.spritecollide(player, level.objects, False):
+                    if player.prev_x < collision.rect.centerx:
+                        player.rect.right = collision.rect.left
+                        collision.delta = player.speed
+                    elif player.prev_x > collision.rect.centerx:
+                        player.rect.left = collision.rect.right
+                        collision.delta = -player.speed
 
                 # Bound to walls
                 if player.rect.left < horizontal_constraints[0]:
@@ -284,13 +279,13 @@ class Game(object):
                 if player.rect.right > horizontal_constraints[1]:
                     player.rect.right = horizontal_constraints[1]
 
-                if not self.free_camera_movement and (keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]):
+                if keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]:
                     player.vertical_acceleration += 4
                     player.is_slamming = True
                 else: player.is_slamming = False
 
                 # Vertical logic
-                if (key_w or key_SPACE) and not player.is_in_air and not player.is_slamming and not self.free_camera_movement:
+                if (key_w or key_SPACE) and not player.is_in_air and not player.is_slamming:
                     if not self.NOAUDIO: self.JUMP.play()
                     player.vertical_acceleration -= 9
                     player.is_in_air = True
@@ -355,57 +350,17 @@ class Game(object):
                         level.enable_ai()
                         self.no_ai = False
 
-                    # Start or stop free camera movement
-                    if keys[pygame.K_F1] and not self.free_camera_movement:
-                        self.total_free_camera_offset_x = 0
-                        self.total_free_camera_offset_y = 0
-                        self.free_camera_movement = True
-                        print 'Free camera movement enabled'
-                    if keys[pygame.K_F2] and self.free_camera_movement:
-
-                        # Reset camera
-                        self.offset_sprites(level, horizontal_constraints, vertical_constraints, player, self.total_free_camera_offset_x, -self.total_free_camera_offset_y)
-                        self.free_camera_movement = False
-                        print 'Free camera movement disabled'
-
                 '''
                 Camera logic
                 '''
 
-                offset_x = 0
-                offset_y = 0
-
-                if self.free_camera_movement:
-                    if key_d:
-                        offset_x -= player.speed
-                    if key_a:
-                        offset_x += player.speed
-                    if key_w:
-                        offset_y += player.speed
-                    if key_s:
-                        offset_y -= player.speed
-                    if keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]:
-                        offset_x *= 2
-                        offset_y *= 2
-
-                    self.total_free_camera_offset_x += offset_x
-                    self.total_free_camera_offset_y += offset_y
-
-                # Move camera horizontally
-                if not self.free_camera_movement and player.rect.centerx > horizontal_constraints[0] + (self.SCREEN_SIZE[0] / 2) and player.rect.centerx < horizontal_constraints[1] - (self.SCREEN_SIZE[0] / 2):
-                    if player.rect.x > player.prev_x:
-                        offset_x += player.rect.x - player.prev_x
-                    elif player.rect.x < player.prev_x:
-                        offset_x -= player.prev_x - player.rect.x
-
-                # Move camera vertically
-                if not self.free_camera_movement and player.rect.centery > vertical_constraints[0] + (self.SCREEN_SIZE[1] / 2) and player.rect.centery < vertical_constraints[1] - (self.SCREEN_SIZE[1] / 2) and player.prev_y != player.rect.y:
-                    offset_y = self.SCREEN_SIZE[1] / 2 - player.rect.centery
+                offset_x = player.prev_x - player.rect.x
+                offset_y = player.prev_y - player.rect.y
 
                 self.offset_sprites(level, horizontal_constraints, vertical_constraints, player, offset_x, offset_y)
 
                 # Add to total
-                self.total_offset_x -= offset_x
+                self.total_offset_x += offset_x
                 self.total_offset_y += offset_y
 
                 # Check if level passed
@@ -425,26 +380,9 @@ class Game(object):
                         player.health = player.max_health
                         life_rects.pop()
                         if self.VERBOSE: print 'Player died. %d lives remaining.' % player.lives
-                        horizontal_constraints[0] -= self.total_offset_x
-                        horizontal_constraints[1] -= self.total_offset_x
-                        level.ending.rect.x -= self.total_offset_x
-                        vertical_constraints[0] -= self.total_offset_y
-                        vertical_constraints[1] -= self.total_offset_y
-                        level.ending.rect.y -= self.total_offset_y
-                        for cloud in level.clouds:
-                            cloud.rect.x -= self.total_offset_x / self.PARALAX_RATIO
-                            cloud.rect.y -= self.total_offset_y / self.PARALAX_RATIO
-                        for platform_sprite in level.level_group:
-                            platform_sprite.rect.x -= self.total_offset_x
-                            platform_sprite.rect.y -= self.total_offset_y
-                        for enemy in level.enemies:
-                            enemy.rect.x -= self.total_offset_x
-                            enemy.rect.y -= self.total_offset_y
-                        for object in level.objects:
-                            object.rect.x -= self.total_offset_x
-                            object.rect.y -= self.total_offset_y
-                        player.rect.x = level.player_start[0]
-                        player.rect.y = level.player_start[1]
+                        self.offset_sprites(level, horizontal_constraints, vertical_constraints, player, -self.total_offset_x, -self.total_offset_y)
+                        player.rect.x = (screen_x / 2) + 75
+                        player.rect.y = (screen_y / 2) + 75
                         player.vertical_acceleration = 0
                         self.total_offset_x = 0
                         self.total_offset_y = 0
@@ -492,10 +430,10 @@ class Game(object):
         if offset_x == 0 and offset_y == 0: return
 
         # Horizontal single changes
-        player.rect.x -= offset_x
-        horizontal_constraints[0] -= offset_x
-        horizontal_constraints[1] -= offset_x
-        level.ending.rect.x -= offset_x
+        player.rect.x += offset_x
+        horizontal_constraints[0] += offset_x
+        horizontal_constraints[1] += offset_x
+        level.ending.rect.x += offset_x
 
         # Vertical single chagnes
         player.rect.y += offset_y
@@ -505,16 +443,16 @@ class Game(object):
 
         # Multi-sprite changes
         for cloud in level.clouds:
-            cloud.rect.x -= offset_x / self.PARALAX_RATIO
+            cloud.rect.x += offset_x / self.PARALAX_RATIO
             cloud.rect.y += offset_y / self.PARALAX_RATIO
         for sprite in level.level_group:
-            sprite.rect.x -= offset_x
+            sprite.rect.x += offset_x
             sprite.rect.y += offset_y
         for sprite in level.objects:
-            sprite.rect.x -= offset_x
+            sprite.rect.x += offset_x
             sprite.rect.y += offset_y
         for sprite in level.enemies:
-            sprite.rect.x -= offset_x
+            sprite.rect.x += offset_x
             sprite.rect.y += offset_y
 
     def check_collide(self, sprite, group, dir):
