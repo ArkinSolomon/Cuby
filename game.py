@@ -367,6 +367,8 @@ class Game(object):
                 level.update()
                 if player.rect.colliderect(level.ending.rect) and not level.ending.locked:
                     self.game_is_running = False
+                    self.total_offset_x = 0
+                    self.total_offset_y = 0
                     self.update(m)
 
                 # Check if player died
@@ -381,8 +383,9 @@ class Game(object):
                         life_rects.pop()
                         if self.VERBOSE: print 'Player died. %d lives remaining.' % player.lives
                         self.offset_sprites(level, horizontal_constraints, vertical_constraints, player, -self.total_offset_x, -self.total_offset_y)
-                        player.rect.x = (screen_x / 2) + 75
-                        player.rect.y = (screen_y / 2) + 75
+                        player.rect.x = (screen_x / 2) - 75
+                        player.rect.y = (screen_y / 2) - 75
+                        print self.total_offset_x
                         player.vertical_acceleration = 0
                         self.total_offset_x = 0
                         self.total_offset_y = 0
