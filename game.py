@@ -167,7 +167,7 @@ class Game(object):
                     # Vertical logic
                     enemy.prev_y = enemy.rect.y
                     if jump: enemy.jump()
-                    enemy.vertical_acceleration += self.GRAVITY
+                    enemy.vertical_acceleration += self.GRAVITY * .76
                     enemy.rect.y += enemy.vertical_acceleration
 
                     # Vertical collisions
@@ -213,7 +213,7 @@ class Game(object):
 
                     # Gravity
                     object.prev_y = object.rect.y
-                    object.vertical_acceleration += self.GRAVITY
+                    object.vertical_acceleration += self.GRAVITY * 1.23
                     object.rect.y += object.vertical_acceleration
                     g = level.level_group.copy()
                     g.add(level.objects)
