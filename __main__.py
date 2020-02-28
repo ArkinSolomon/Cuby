@@ -7,6 +7,7 @@ from movable_object import Movable_Object
 from ending import Ending
 from enemy import Enemy
 from cloud import Cloud
+from creator_level_selection import Creator_Level_Selection
 import json
 import os
 from os.path import exists, isfile, isdir
@@ -220,8 +221,8 @@ while main_menu_is_active:
             parse_levels()
 
         if level_create_button.check_click(mouse_pos[0], mouse_pos[1]):
-            if VERBOSE: print 'Starting level creator'
-            Level_Creator(VERBOSE, SHOW_FPS).start(screen)
+            if VERBOSE: print 'Starting level creator selection'
+            Creator_Level_Selection(__levels, screen, screen_x, screen_y, VERBOSE, SHOW_FPS).start()
             __levels = []
             parse_levels()
 
