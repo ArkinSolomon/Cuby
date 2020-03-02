@@ -1,5 +1,4 @@
 import sys
-from game import Game
 from level_creator import Level_Creator
 from level import Level
 from game_platform import Platform
@@ -7,6 +6,7 @@ from movable_object import Movable_Object
 from ending import Ending
 from enemy import Enemy
 from cloud import Cloud
+from game_level_selection import Game_Level_Selection
 from creator_level_selection import Creator_Level_Selection
 import json
 import os
@@ -148,7 +148,7 @@ else:
     __reset_level_file()
 
 if level_override != None:
-    print 'Level file overriden, starting save file at %d' % (level_override + 1)
+    print 'Level file overriden, starting save file at level %d' % (level_override + 1)
     current_level = level_override
     __update_level_file(level_override)
 
@@ -156,6 +156,7 @@ if level_override != None:
 def update(m):
     if VERBOSE: print 'Level %d passed' % (m.current_level + 1)
     m.current_level += 1
+    first_game = False
     __update_level_file(m.current_level)
 
 '''
@@ -179,6 +180,7 @@ clouds = Cloud(screen, screen_x, screen_y, [-150, screen_x + 150], [-450, screen
 clouds_2 = Cloud(screen, screen_x, screen_y, [-150 + screen_x, 2 * screen_x + 150], [-450, screen_y + 450], False).clouds
 
 main_menu_is_active = True
+first_game = True
 
 def __quit():
     main_menu_is_active = False
@@ -215,7 +217,7 @@ while main_menu_is_active:
                 current_level = 0
                 if VERBOSE: print 'Currrent level higher than max levels, reseting to 0'
             if VERBOSE: print 'Starting game at level %d' % (current_level + 1)
-            Game(__levels, update, VERBOSE, DEBUG, NOAI, NOAUDIO, SHOW_FPS).start(screen)
+            Game_Level_Selection(__levels, update, screen, screen_x, screen_y, VERBOSE, DEBUG, NOAI, NOAUDIO, SHOW_FPS).start()
             pygame.mouse.set_visible(True)
             __levels = []
             parse_levels()
