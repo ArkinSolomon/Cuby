@@ -156,7 +156,6 @@ if level_override != None:
 def update(m):
     if VERBOSE: print 'Level %d passed' % (m.current_level + 1)
     m.current_level += 1
-    first_game = False
     __update_level_file(m.current_level)
 
 '''
@@ -180,7 +179,6 @@ clouds = Cloud(screen, screen_x, screen_y, [-150, screen_x + 150], [-450, screen
 clouds_2 = Cloud(screen, screen_x, screen_y, [-150 + screen_x, 2 * screen_x + 150], [-450, screen_y + 450], False).clouds
 
 main_menu_is_active = True
-first_game = True
 
 def __quit():
     main_menu_is_active = False
