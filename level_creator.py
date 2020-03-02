@@ -26,6 +26,7 @@ class Level_Creator(object):
         self.editing = False
         self.type = Creation_Type.PLATFORM
         self.FPS = 60
+        self.delete = False
 
         self.player_start = None
         self.sprites = pygame.sprite.Group()
@@ -43,14 +44,6 @@ class Level_Creator(object):
         if self.VERBOSE: print 'Level Creator initialized'
 
     def start(self, screen, edit_level, index):
-
-        if edit_level is not None and index is not None:
-            self.editing = True
-            self.player_start = edit_level.player_start
-            self.sprites = edit_level.level_group
-            self.enemies = edit_level.enemies
-            self.objects = edit_level.objects
-            self.ending = [edit_level.ending.rect.x, edit_level.ending.rect.y]
 
         e_offset = 75 / 2
 
@@ -70,9 +63,19 @@ class Level_Creator(object):
         button_x += BUTTON_X_DELTA + BUTTON_SIZE
         self.set_object_button = Button([button_x, button_y], BUTTON_SIZE, BUTTON_SIZE, 'Object', 25, screen)
 
-        self.save_button = Button([self.screen_x - 360, button_y], BUTTON_SIZE, BUTTON_SIZE, 'Save', 30, screen)
+        self.delete_button = Button([self.screen_x - 90, self.screen_y - 135], BUTTON_SIZE, BUTTON_SIZE, 'Delete', 25, screen)
+        self.save_button = Button([self.screen_x - 90, self.screen_y - 405], BUTTON_SIZE, BUTTON_SIZE, 'Save', 30, screen)
         self.save_button.disabled = True
-        self.cancel_buttton = Button([self.screen_x - 180, button_y], BUTTON_SIZE, BUTTON_SIZE, 'Cancel', 30, screen)
+        self.cancel_buttton = Button([self.screen_x - 90, self.screen_y - 270], BUTTON_SIZE, BUTTON_SIZE, 'Cancel', 27, screen)
+
+        if edit_level is not None and index is not None:
+            self.editing = True
+            self.player_start = edit_level.player_start
+            self.sprites = edit_level.level_group
+            self.enemies = edit_level.enemies
+            self.objects = edit_level.objects
+            self.ending = [edit_level.ending.rect.x, edit_level.ending.rect.y]
+        else: self.delete_button.disabled = True
 
         while self.level_creator_is_active:
 
@@ -158,9 +161,11 @@ class Level_Creator(object):
                 self.type = Creation_Type.ENDING
             if button_clicks[4]:
                 self.type = Creation_Type.OBJECT
+            if button_clicks[7]:
+                self.delete = True
 
             # Save the file
-            if button_clicks[5]:
+            if button_clicks[5] or button_clicks[7]:
                 level_path = Path('levels/levels.lvl')
                 if not self.editing:
                     with level_path.open(mode='a+') as file:
@@ -175,12 +180,15 @@ class Level_Creator(object):
                     with level_path.open(mode='r+') as f: data = str(f.read()).split('*LEVEL*\n')
                     del data[0]
                     for d in range(len(data)): data[d] = '*LEVEL*\n' + data[d]
-                    data[index] = '*LEVEL*\n'
-                    data[index] += 'PLS$[%d,%d]\n' % (self.player_start[0], self.player_start[1])
-                    for platform in self.sprites: data[index] += 'PLA$[%d,%d]$%d$%d$#000000\n' % (platform.position[0], platform.position[1], platform.width, platform.height)
-                    for enemy in self.enemies: data[index] += 'ENE$[%d,%d]\n' % (enemy.pos[0], enemy.pos[1])
-                    for object in self.objects: data[index] += 'OBJ$[%d,%d]\n' % (object.pos[0], object.pos[1])
-                    data[index] += 'END$[%d,%d]\n' % (self.ending[0], self.ending[1])
+                    if not self.delete:
+                        data[index] = '*LEVEL*\n'
+                        data[index] += 'PLS$[%d,%d]\n' % (self.player_start[0], self.player_start[1])
+                        for platform in self.sprites: data[index] += 'PLA$[%d,%d]$%d$%d$#000000\n' % (platform.position[0], platform.position[1], platform.width, platform.height)
+                        for enemy in self.enemies: data[index] += 'ENE$[%d,%d]\n' % (enemy.pos[0], enemy.pos[1])
+                        for object in self.objects: data[index] += 'OBJ$[%d,%d]\n' % (object.pos[0], object.pos[1])
+                        data[index] += 'END$[%d,%d]\n' % (self.ending[0], self.ending[1])
+                    else:
+                        del data[index]
                     with level_path.open(mode='w+') as f: f.write(unicode(''.join(data)))
                 self.level_creator_is_active = False
                 return
@@ -254,6 +262,7 @@ class Level_Creator(object):
             self.set_enemy_button.draw()
             self.set_ending_button.draw()
             self.set_object_button.draw()
+            self.delete_button.draw()
             self.save_button.draw()
             self.cancel_buttton.draw()
 
@@ -275,7 +284,7 @@ class Level_Creator(object):
         return top_left
 
     def __calculate_button_clicks(self, mouse_pos):
-        return [self.set_player_start_button.check_click(mouse_pos[0], mouse_pos[1]), self.set_platform_button.check_click(mouse_pos[0], mouse_pos[1]), self.set_enemy_button.check_click(mouse_pos[0], mouse_pos[1]), self.set_ending_button.check_click(mouse_pos[0], mouse_pos[1]), self.set_object_button.check_click(mouse_pos[0], mouse_pos[1]), self.save_button.check_click(mouse_pos[0], mouse_pos[1]),  self.cancel_buttton.check_click(mouse_pos[0], mouse_pos[1])]
+        return [self.set_player_start_button.check_click(mouse_pos[0], mouse_pos[1]), self.set_platform_button.check_click(mouse_pos[0], mouse_pos[1]), self.set_enemy_button.check_click(mouse_pos[0], mouse_pos[1]), self.set_ending_button.check_click(mouse_pos[0], mouse_pos[1]), self.set_object_button.check_click(mouse_pos[0], mouse_pos[1]), self.save_button.check_click(mouse_pos[0], mouse_pos[1]),  self.cancel_buttton.check_click(mouse_pos[0], mouse_pos[1]), self.delete_button.check_click(mouse_pos[0], mouse_pos[1])]
 
     def stop(self):
         if self.VERBOSE: print 'Halt signal recieved, creator closing'
