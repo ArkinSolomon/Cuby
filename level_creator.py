@@ -23,6 +23,7 @@ class Level_Creator(object):
         self.prevent_dual_click = False
         self.initial_mouse_pos = None
         self.final_mouse_pos = None
+        self.editing = False
         self.type = Creation_Type.PLATFORM
         self.FPS = 60
 
@@ -41,7 +42,15 @@ class Level_Creator(object):
 
         if self.VERBOSE: print 'Level Creator initialized'
 
-    def start(self, screen):
+    def start(self, screen, edit_level, index):
+
+        if edit_level is not None and index is not None:
+            self.editing = True
+            self.player_start = edit_level.player_start
+            self.sprites = edit_level.level_group
+            self.enemies = edit_level.enemies
+            self.objects = edit_level.objects
+            self.ending = [edit_level.ending.rect.x, edit_level.ending.rect.y]
 
         e_offset = 75 / 2
 
@@ -152,14 +161,27 @@ class Level_Creator(object):
 
             # Save the file
             if button_clicks[5]:
-                level_path = Path('%s/%s' % ('levels', 'levels.lvl'))
-                with level_path.open(mode='a+') as file:
-                    file.write(u'*LEVEL*\n')
-                    file.write(u'PLS$[%d,%d]\n' % (self.player_start[0], self.player_start[1]))
-                    for platform in self.sprites: file.write(u'PLA$[%d,%d]$%d$%d$#000000\n' % (platform.position[0], platform.position[1], platform.width, platform.height))
-                    for enemy in self.enemies: file.write(u'ENE$[%d,%d]\n' % (enemy.pos[0], enemy.pos[1]))
-                    for object in self.objects: file.write(u'OBJ$[%d,%d]\n' % (object.pos[0], object.pos[1]))
-                    file.write(u'END$[%d,%d]\n' % (self.ending[0], self.ending[1]))
+                level_path = Path('levels/levels.lvl')
+                if not self.editing:
+                    with level_path.open(mode='a+') as file:
+                        file.write(u'*LEVEL*\n')
+                        file.write(u'PLS$[%d,%d]\n' % (self.player_start[0], self.player_start[1]))
+                        for platform in self.sprites: file.write(u'PLA$[%d,%d]$%d$%d$#000000\n' % (platform.position[0], platform.position[1], platform.width, platform.height))
+                        for enemy in self.enemies: file.write(u'ENE$[%d,%d]\n' % (enemy.pos[0], enemy.pos[1]))
+                        for object in self.objects: file.write(u'OBJ$[%d,%d]\n' % (object.pos[0], object.pos[1]))
+                        file.write(u'END$[%d,%d]\n' % (self.ending[0], self.ending[1]))
+                else:
+                    data = None
+                    with level_path.open(mode='r+') as f: data = str(f.read()).split('*LEVEL*\n')
+                    del data[0]
+                    for d in range(len(data)): data[d] = '*LEVEL*\n' + data[d]
+                    data[index] = '*LEVEL*\n'
+                    data[index] += 'PLS$[%d,%d]\n' % (self.player_start[0], self.player_start[1])
+                    for platform in self.sprites: data[index] += 'PLA$[%d,%d]$%d$%d$#000000\n' % (platform.position[0], platform.position[1], platform.width, platform.height)
+                    for enemy in self.enemies: data[index] += 'ENE$[%d,%d]\n' % (enemy.pos[0], enemy.pos[1])
+                    for object in self.objects: data[index] += 'OBJ$[%d,%d]\n' % (object.pos[0], object.pos[1])
+                    data[index] += 'END$[%d,%d]\n' % (self.ending[0], self.ending[1])
+                    with level_path.open(mode='w+') as f: f.write(unicode(''.join(data)))
                 self.level_creator_is_active = False
                 return
 

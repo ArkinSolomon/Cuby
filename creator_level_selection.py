@@ -21,10 +21,10 @@ class Creator_Level_Selection:
         self.SUN = pygame.image.load('images/sun.png')
 
         # Generate buttons
-        columns = math.floor(screen_x / 120)
+        columns = math.floor(screen_x / 120) - 1
         rows = math.floor((screen_y - 200) / 120)
-        x_left = (screen_x - rows * 120 - 30) / 2
-        y_top = (screen_y - (((screen_y - 200) / 120) - 30)) / 2
+        x_left = (screen_x - ((columns * 120) - 30)) / 2
+        y_top = ((screen_y - 200) - ((rows * 120) - 30)) / 2
         count = 0
         for _ in range(int(math.floor(len(levels) / (columns * rows)) + 1)):
             page = pygame.sprite.Group()
@@ -33,8 +33,12 @@ class Creator_Level_Selection:
             for _ in range(int(rows)):
                 for _ in range(int(columns)):
                     count += 1
-                    page.add(Button([x, y], 90, 90, str(count), 50, screen))
+                    if count == len(levels) + 1:
+                        page.add(Button([x, y], 90, 90, 'New', 50, screen))
+                        break
+                    else: page.add(Button([x, y], 90, 90, str(count), 50, screen))
                     x += 120
+                if count == len(levels) + 1: break
                 y += 120
                 x = x_left
             self.pages.append(page)
@@ -52,9 +56,31 @@ class Creator_Level_Selection:
                     if self.VERBOSE: print 'Level selection canceled, returning to main menu'
                     return
 
+            mouse_pos = pygame.mouse.get_pos()
+            button = self.getClickedButton(mouse_pos)
+            if button is not None:
+                if button.text == 'New':
+                    return Level_Creator(self.VERBOSE, self.SHOW_FPS).start(self.screen, None, None)
+                else:
+                    selected_level = int(button.text) - 1
+                    return Level_Creator(self.VERBOSE, self.SHOW_FPS).start(self.screen, self.levels[selected_level], selected_level)
+
+            '''
+            All drawing
+            '''
+
             self.screen.fill(pygame.Color('lightblue'))
             self.screen.blit(self.SUN, (50, 50))
 
             for p in self.pages[self.selected_page]:
                 p.draw()
+
+            if self.SHOW_FPS: screen.blit(fps_font.render(str(int(clock.get_fps())), True, pygame.Color('white'), pygame.Color('black')), (0, 0))
+
             pygame.display.flip()
+
+    # Returns clicked button
+    def getClickedButton(self, mouse_pos):
+        for b in self.pages[self.selected_page]:
+            if b.check_click(mouse_pos[0], mouse_pos[1]): return b
+        return None

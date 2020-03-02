@@ -11,8 +11,8 @@ class Button(pygame.sprite.Sprite):
         self.coords = coords
 
         self.font = pygame.font.SysFont('Comic Sans MS', size)
-        self.text = self.font.render(text, True, (0, 0, 0))
-        self.t = text
+        self.t = self.font.render(text, True, (0, 0, 0))
+        self.text = text
         self.disabled = False
 
         self.image = pygame.Surface([w, h])
@@ -31,4 +31,4 @@ class Button(pygame.sprite.Sprite):
             self.image.fill(pygame.Color('grey'))
         else:
             self.image.fill(self.color)
-        self.screen.blit(self.text, (self.coords[0] + ((self.rect.width / 2) - self.font.size(self.t)[0] / 2), self.coords[1] + ((self.rect.height / 2) - self.font.size(self.t)[1] / 2)))
+        self.screen.blit(self.t, (self.coords[0] + ((self.rect.width / 2) - self.font.size(self.text)[0] / 2), self.coords[1] + ((self.rect.height / 2) - self.font.size(self.text)[1] / 2)))

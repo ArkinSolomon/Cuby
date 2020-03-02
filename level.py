@@ -8,16 +8,20 @@ class Level(object):
     def __init__(self, screen, NOAUDIO):
         super(Level, self).__init__()
 
+        self.screen = screen
+        self.NOAUDIO = NOAUDIO
+
         self.level_group = pygame.sprite.Group()
         self.ending_group = pygame.sprite.Group()
         self.enemies = pygame.sprite.Group()
         self.objects = pygame.sprite.Group()
-        self.screen = screen
+
+        self.player_start = None
+        self.ending = None
+
         self.render = True
         self.unlocked = False
         self.first_loop_check = True
-
-        self.NOAUDIO = NOAUDIO
 
         if not self.NOAUDIO: self.UNLOCK_SOUND = pygame.mixer.Sound('audio/exit_unlock.wav')
 
