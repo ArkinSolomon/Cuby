@@ -75,6 +75,8 @@ class Game_Level_Selection:
             self.next_button.disabled = True
         elif len(self.pages) > 1: self.back_button.disabled = True
 
+        clock = pygame.time.Clock()
+
         if self.VERBOSE: print 'Game selection screen initialized'
 
         while self.game_selection_screen_is_active:
@@ -123,9 +125,11 @@ class Game_Level_Selection:
             self.next_button.draw()
             self.screen.blit(self.text, self.text_coords)
 
-            if self.SHOW_FPS: screen.blit(self.fps_font.render(str(int(clock.get_fps())), True, pygame.Color('white'), pygame.Color('black')), (0, 0))
+            if self.SHOW_FPS: self.screen.blit(self.fps_font.render(str(int(clock.get_fps())), True, pygame.Color('white'), pygame.Color('black')), (0, 0))
 
             pygame.display.flip()
+
+            clock.tick(60)
 
     # Returns clicked button
     def getClickedButton(self, mouse_pos):
