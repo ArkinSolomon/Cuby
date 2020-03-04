@@ -145,6 +145,7 @@ class Level_Creator(object):
                 for sprite in all_sprites:
                     if sprite.rect.collidepoint((mouse_pos[0] + self.offset[0], mouse_pos[1] + self.offset[1])):
                         sprite.kill()
+                        break;
 
             # Reset camera
             if keys[pygame.K_SPACE]:
@@ -161,7 +162,7 @@ class Level_Creator(object):
                 self.type = Creation_Type.ENDING
             if button_clicks[4]:
                 self.type = Creation_Type.OBJECT
-            if button_clicks[7] and keys[pygame.K_]:
+            if button_clicks[7]:
                 self.delete = True
 
             # Save the file
