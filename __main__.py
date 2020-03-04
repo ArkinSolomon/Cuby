@@ -19,7 +19,7 @@ from button import Button
 This file handles the game initialization as well as game saving.
 '''
 
-VERSION = '0.4.1'
+VERSION = '0.4.2'
 
 # Clear console
 if sys.platform == 'win32':
