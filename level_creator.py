@@ -148,7 +148,7 @@ class Level_Creator(object):
 
             # Reset camera
             if keys[pygame.K_SPACE]:
-                self.offset = [0, 0]
+                self.offset = [75 + self.player_start[0] - self.screen_x / 2, 75 + self.player_start[1] - self.screen_y / 2] if self.player_start is not None else [0, 0]
 
             # Change placement types
             if button_clicks[0]:
@@ -161,11 +161,11 @@ class Level_Creator(object):
                 self.type = Creation_Type.ENDING
             if button_clicks[4]:
                 self.type = Creation_Type.OBJECT
-            if button_clicks[7]:
+            if button_clicks[7] and keys[pygame.K_]:
                 self.delete = True
 
             # Save the file
-            if button_clicks[5] or button_clicks[7]:
+            if button_clicks[5] or self.delete:
                 level_path = Path('levels/levels.lvl')
                 if not self.editing:
                     with level_path.open(mode='a+') as file:
@@ -196,6 +196,11 @@ class Level_Creator(object):
             if button_clicks[6]:
                 self.level_creator_is_active = False
                 return
+
+            # If the delete button is enabled
+            if (keys[pygame.K_RSHIFT] | keys[pygame.K_LSHIFT]) and edit_level is not None and index is not None:
+                self.delete_button.disabled = False
+            else: self.delete_button.disabled = True
 
             # Draw sky
             screen.fill(pygame.Color('lightblue'))

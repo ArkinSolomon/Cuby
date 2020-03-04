@@ -2,7 +2,7 @@
 
 ## About:
 
-Cuby is a game in where you, a cube, must defeat all the evil circles with poisonous skin by crushing them. This game was created for my Introduction to Computer Programming class and is very much still in development.
+Cuby is a game in where you, a cube, must defeat all the evil circles by slamming on top of them and crushing them. This game was created for my Introduction to Computer Programming class and is very much still in development. THERE WILL BE BUGS.
 
 ## Installation:
 
@@ -13,8 +13,14 @@ You will need these modules if you run it using Python:
 
 If you want to compile it from source you will need to install [py2exe for Python 2.7](https://sourceforge.net/projects/py2exe/files/py2exe/0.6.9/). Depending on your Python installation, you may need to download the unofficial version from [here](https://www.lfd.uci.edu/~gohlke/pythonlibs/).
 
-## Debug keys:
+## Controls:
+ - W or UP or SPACE: Jump
+ - A or LEFT: Move left
+ - D or RIGHT: Move right
+ - L/R SHIFT: Slam
+ - Escape: Quit/return
 
+## Debug keys:
 - o: Enable rendering checking
 - p: Disable rendering checking
 - MINUS: Disable enemy AI
