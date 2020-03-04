@@ -6,7 +6,7 @@ import __main__ as m
 
 class Game_Level_Selection:
 
-    def __init__(self, levels, update, screen, screen_x, screen_y, VERBOSE, DEBUG, NOAI, NOAUDIO, SHOW_FPS):
+    def __init__(self, levels, update, screen, screen_x, screen_y, VERBOSE, DEBUG, NOAI, NOAUDIO, SHOW_FPS, UNLOCKALL):
         self.levels = levels
         self.update = update
         self.screen = screen
@@ -17,6 +17,7 @@ class Game_Level_Selection:
         self.NOAI = NOAI
         self.NOAUDIO = NOAUDIO
         self.SHOW_FPS = SHOW_FPS
+        self.UNLOCKALL = UNLOCKALL
 
         self.game_selection_screen_is_active = False
 
@@ -45,7 +46,7 @@ class Game_Level_Selection:
                     if self.VERBOSE: print 'Generating selection button for level %s' % str(count)
                     if count == len(levels) + 1: break
                     b = Button([x, y], 90, 90, str(count), 50, screen)
-                    if count > m.current_level + 1: b.disabled = True
+                    if not self.UNLOCKALL and count > m.current_level + 1: b.disabled = True
                     page.add(b)
                     if self.VERBOSE: print 'Generated selection button for level %s' % str(count)
                     x += 120

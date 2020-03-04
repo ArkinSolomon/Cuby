@@ -19,7 +19,7 @@ from button import Button
 This file handles the game initialization as well as game saving.
 '''
 
-VERSION = '0.4.0'
+VERSION = '0.4.1'
 
 # Clear console
 if sys.platform == 'win32':
@@ -44,6 +44,8 @@ NOAI = True if '--no-ai' in sys.argv else False
 if NOAI: print 'Starting game with enemy AI disabled'
 NOAUDIO = True if '--no-audio' in sys.argv else False
 if NOAUDIO: print 'Starting game with audio disabled'
+UNLOCKALL = True if '--unlock-all' in sys.argv else False
+if UNLOCKALL: print 'Starting game with all levels unlocked'
 
 '''
 Initialization
@@ -215,7 +217,7 @@ while main_menu_is_active:
                 current_level = 0
                 if VERBOSE: print 'Currrent level higher than max levels, reseting to 0'
             if VERBOSE: print 'Starting game at level %d' % (current_level + 1)
-            Game_Level_Selection(__levels, update, screen, screen_x, screen_y, VERBOSE, DEBUG, NOAI, NOAUDIO, SHOW_FPS).start()
+            Game_Level_Selection(__levels, update, screen, screen_x, screen_y, VERBOSE, DEBUG, NOAI, NOAUDIO, SHOW_FPS, UNLOCKALL).start()
             pygame.mouse.set_visible(True)
             __levels = []
             parse_levels()

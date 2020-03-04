@@ -25,11 +25,8 @@ class Cloud(object):
         x_screens = int(math.ceil((horizontal_constraints[1] - horizontal_constraints[0]) / width))
         y_screens = int(math.ceil((vertical_constraints[1] - vertical_constraints[0]) / height))
 
-        x_screens = 2 if x_screens <= 0 else x_screens
-        y_screens = 2 if y_screens <= 1 else y_screens
-
         for _ in range(x_screens):
-            curr_y = height if vertical_constraints[1] - vertical_constraints[0] < height else vertical_constraints[0]
+            curr_y = vertical_constraints[0]
             for _ in range(y_screens):
                 for _ in range(randrange(8, 12, 1)):
                     CLOUD = POSSIBLE_CLOUDS[randrange(0, len(POSSIBLE_CLOUDS) - 1, 1)]
@@ -37,7 +34,7 @@ class Cloud(object):
 
                     # Make sure cloud has 6 parts
                     if len(current_cloud) < 6:
-                        for j in range(6 - len(current_cloud)):
+                        for _ in range(6 - len(current_cloud)):
                             current_cloud.insert(0, 0)
 
                     x = randrange(curr_x, curr_x + (width - (self.part_size * 3)), self.part_size)

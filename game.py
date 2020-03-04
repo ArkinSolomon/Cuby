@@ -197,7 +197,9 @@ class Game(object):
                     # Move horizontally
                     object.prev_x = object.rect.x
                     object.rect.x += object.delta
-                    for collision in pygame.sprite.spritecollide(object, level.level_group, False):
+                    exclusive_object_group = level.objects.copy()
+                    exclusive_object_group.remove(object)
+                    for collision in pygame.sprite.spritecollide(object, level.level_group, False) + pygame.sprite.spritecollide(object, exclusive_object_group, False):
                         if object.prev_x < object.rect.x:
                             object.rect.right = collision.rect.left
                         elif object.prev_x > object.rect.x:
