@@ -2,7 +2,7 @@
 
 ## About:
 
-Cuby is a game in where you, a cube, must defeat all the evil circles by slamming on top of them and crushing them. This game was created for my Introduction to Computer Programming class and is very much still in development. THERE WILL BE BUGS.
+Cuby is a game in where you, a cube, must defeat all the evil circles by slamming on top of them and crushing them. This game was created for my Introduction to Computer Programming class. THERE WILL BE BUGS.
 
 ## Installation:
 
