@@ -20,7 +20,7 @@ class Cloud(object):
         # Print a random amount of clouds
         curr_x = horizontal_constraints[0]
 
-        if VERBOSE: print 'Creating cloud set'
+        if VERBOSE: print('Creating cloud set')
 
         x_screens = int(math.ceil((horizontal_constraints[1] - horizontal_constraints[0]) / width))
         y_screens = int(math.ceil((vertical_constraints[1] - vertical_constraints[0]) / height))
@@ -41,7 +41,7 @@ class Cloud(object):
                     y = randrange(curr_y, curr_y + (height - (self.part_size * 3)), self.part_size)
                     y_inc_count = 0
 
-                    if VERBOSE: print 'Creating cloud at (%d, %d) [C#%d]' % (x, y, CLOUD)
+                    if VERBOSE: print('Creating cloud at (%d, %d) [C#%d]') % (x, y, CLOUD)
 
                     # Create cloud
                     for cloud_part in current_cloud:

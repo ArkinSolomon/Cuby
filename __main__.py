@@ -29,7 +29,7 @@ else:
 
 # Runtime flags
 VERBOSE = True if '-v' in sys.argv or '--verbose' in sys.argv else False
-if VERBOSE: print 'Running Cuby in verbose mode'
+if VERBOSE: print('Running Cuby in verbose mode')
 level_override = None
 if '-l' in sys.argv or '--level' in sys.argv:
     if '-l' in sys.argv:
@@ -37,24 +37,24 @@ if '-l' in sys.argv or '--level' in sys.argv:
     else:
         level_override = int(sys.argv[sys.argv.index('-l') + 1])
 DEBUG = True if '-d' in sys.argv or '--debug' in sys.argv else False
-if DEBUG: print 'Debugging Cuby'
+if DEBUG: print('Debugging Cuby')
 SHOW_FPS = True if '-f' in sys.argv or '--show-fps' in sys.argv else False
-if VERBOSE and SHOW_FPS: print 'Showing FPS in-game'
+if VERBOSE and SHOW_FPS: print('Showing FPS in-game')
 NOAI = True if '--no-ai' in sys.argv else False
-if NOAI: print 'Starting game with enemy AI disabled'
+if NOAI: print('Starting game with enemy AI disabled')
 NOAUDIO = True if '--no-audio' in sys.argv else False
-if NOAUDIO: print 'Starting game with audio disabled'
+if NOAUDIO: print('Starting game with audio disabled')
 UNLOCKALL = True if '--unlock-all' in sys.argv else False
-if UNLOCKALL: print 'Starting game with all levels unlocked'
+if UNLOCKALL: print('Starting game with all levels unlocked')
 
 '''
 Initialization
 '''
 
-if VERBOSE: print 'Initializing Cuby version %s' % VERSION
+if VERBOSE: print('Initializing Cuby version %s') % VERSION
 
 pygame.init()
-if VERBOSE: print 'Pygame initialized'
+if VERBOSE: print('Pygame initialized')
 screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN | pygame.HWSURFACE)
 
 # Load images
@@ -64,7 +64,7 @@ SUN = pygame.image.load('images/sun.png')
 # Update level in file
 def __update_level_file(c):
         with __data_path.open(mode='w') as file:
-            file.write(unicode('{"currentLevel":%d}' % c))
+            file.write(str('{"currentLevel":%d}' % c))
 
 # Set the level in the file to 0
 def __reset_level_file(): __update_level_file(0)
@@ -80,14 +80,14 @@ def parse_levels():
     __new_file = False
     __file_exists = __level_folder.exists() and __level_folder.is_dir() and __level_path.exists() and __level_path.is_file()
     if not __file_exists:
-        if VERBOSE: print 'Level file doesn\'t exist, making new'
+        if VERBOSE: print('Level file doesn\'t exist, making new')
         if not exists(__level_folder.name) and not isdir(__level_folder.name):
             os.mkdir(__level_folder.name)
         __level_path.touch()
         __new_file = True
 
     if not __new_file:
-        if VERBOSE: print 'Level file exists'
+        if VERBOSE: print('Level file exists')
         with __level_path.open(mode='r') as f:
             file = str(f.read())
             levels = file.split('*LEVEL*\n')
@@ -100,7 +100,7 @@ def parse_levels():
 
                 # Loop through all lines
                 for line in lines:
-                    if VERBOSE: print 'Parsing line: %s' % line
+                    if VERBOSE: print('Parsing line: %s') % line
                     item = line.split('$')
                     coords = json.loads('{"d":' + item[1] + '}')['d']
                     if item[0] == 'PLA':
@@ -126,13 +126,13 @@ __new_file = False
 # Check if the data file exists
 __file_exists = __data_folder.exists() and __data_folder.is_dir() and __data_path.exists() and __data_path.is_file()
 if not __file_exists:
-    if VERBOSE: print 'Save file doesn\'t exist, making new'
+    if VERBOSE: print('Save file doesn\'t exist, making new')
     if not exists(__data_folder.name) and not isdir(__data_folder.name):
         os.mkdir(__data_folder.name)
     __data_path.touch()
     __new_file = True
 if not __new_file:
-    if VERBOSE: print 'Save file exists, loading data'
+    if VERBOSE: print('Save file exists, loading data')
     with __data_path.open(mode='r') as f:
         file = f.readline()
         try:
@@ -146,17 +146,17 @@ if not __new_file:
             __update_level_file(current_level)
         except Exception as e: __reset_level_file()
 else:
-    if VERBOSE: print 'Save file doesn\'t exist, making new'
+    if VERBOSE: print('Save file doesn\'t exist, making new')
     __reset_level_file()
 
 if level_override != None:
-    print 'Level file overriden, starting save file at level %d' % (level_override + 1)
+    print('Level file overriden, starting save file at level %d') % (level_override + 1)
     current_level = level_override
     __update_level_file(level_override)
 
 # This runs on every level pass
 def update(m):
-    if VERBOSE: print 'Level %d passed' % (m.current_level + 1)
+    if VERBOSE: print('Level %d passed') % (m.current_level + 1)
     m.current_level += 1
     __update_level_file(m.current_level)
 
@@ -215,22 +215,22 @@ while main_menu_is_active:
         if start_button.check_click(mouse_pos[0], mouse_pos[1]):
             if current_level >= len(__levels):
                 current_level = 0
-                if VERBOSE: print 'Currrent level higher than max levels, reseting to 0'
-            if VERBOSE: print 'Starting game at level %d' % (current_level + 1)
+                if VERBOSE: print('Currrent level higher than max levels, reseting to 0')
+            if VERBOSE: print('Starting game at level %d') % (current_level + 1)
             Game_Level_Selection(__levels, update, screen, screen_x, screen_y, VERBOSE, DEBUG, NOAI, NOAUDIO, SHOW_FPS, UNLOCKALL).start()
             pygame.mouse.set_visible(True)
             __levels = []
             parse_levels()
 
         if level_create_button.check_click(mouse_pos[0], mouse_pos[1]):
-            if VERBOSE: print 'Starting level creator selection'
+            if VERBOSE: print('Starting level creator selection')
             Creator_Level_Selection(__levels, screen, screen_x, screen_y, VERBOSE, SHOW_FPS).start()
             __levels = []
             parse_levels()
 
         # Quit the game
         if quit_button.check_click(mouse_pos[0], mouse_pos[1]):
-            if VERBOSE: print 'Game quitting'
+            if VERBOSE: print('Game quitting')
             __quit()
 
     screen.fill(pygame.Color('lightblue'))

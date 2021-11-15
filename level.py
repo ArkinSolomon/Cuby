@@ -83,12 +83,12 @@ class Level(object):
 
     def stop_render(self):
         if not self.render: return
-        print 'Stopping render'
+        print('Stopping render')
         self.render = False
 
     def start_render(self):
         if self.render: return
-        print 'Starting render'
+        print('Starting render')
         self.render = True
 
     def __check_draw(self, sprite_group):

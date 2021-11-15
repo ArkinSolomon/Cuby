@@ -41,7 +41,7 @@ class Level_Creator(object):
 
         self.fps_font = pygame.font.Font('fonts/FreeSansBold.ttf', 20)
 
-        if self.VERBOSE: print 'Level Creator initialized'
+        if self.VERBOSE: print('Level Creator initialized')
 
     def start(self, screen, edit_level, index):
 
@@ -293,6 +293,6 @@ class Level_Creator(object):
         return [self.set_player_start_button.check_click(mouse_pos[0], mouse_pos[1]), self.set_platform_button.check_click(mouse_pos[0], mouse_pos[1]), self.set_enemy_button.check_click(mouse_pos[0], mouse_pos[1]), self.set_ending_button.check_click(mouse_pos[0], mouse_pos[1]), self.set_object_button.check_click(mouse_pos[0], mouse_pos[1]), self.save_button.check_click(mouse_pos[0], mouse_pos[1]),  self.cancel_buttton.check_click(mouse_pos[0], mouse_pos[1]), self.delete_button.check_click(mouse_pos[0], mouse_pos[1])]
 
     def stop(self):
-        if self.VERBOSE: print 'Halt signal recieved, creator closing'
+        if self.VERBOSE: print('Halt signal recieved, creator closing')
         self.level_creator_is_active = False
         return

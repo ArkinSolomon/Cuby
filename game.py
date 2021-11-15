@@ -51,7 +51,7 @@ class Game(object):
         # Load fonts
         self.fps_font = pygame.font.Font('fonts/FreeSansBold.ttf', 20)
 
-        if self.VERBOSE: print 'Game initialized'
+        if self.VERBOSE: print('Game initialized')
 
     # Start the game
     def start(self, screen):
@@ -62,7 +62,7 @@ class Game(object):
         self.SCREEN_SIZE = [screen_x, screen_y]
         pygame.mouse.set_visible(False)
 
-        if self.VERBOSE: print 'Display initialized'
+        if self.VERBOSE: print('Display initialized')
 
         # Loops through all levels
         for level in islice(self.levels, m.current_level, None):
@@ -76,7 +76,7 @@ class Game(object):
             self.game_is_running = True
             if (self.no_ai):
                 level.disable_ai()
-                print 'Game starting with enemy AI disabled'
+                print('Game starting with enemy AI disabled')
 
             # Create rectangles for lives (I just felt like using long variable names)
             life_rect_size = 20
@@ -97,10 +97,10 @@ class Game(object):
             self.initial_move_offset_y = (screen_y / 2) - level.player_start[1] - 75
             self.offset_sprites(level, horizontal_constraints, vertical_constraints, player, self.initial_move_offset_x, self.initial_move_offset_y)
 
-            if self.VERBOSE: print 'Level initialized'
+            if self.VERBOSE: print('Level initialized')
 
             # Main game loop
-            if self.VERBOSE: print 'Starting main game loop'
+            if self.VERBOSE: print('Starting main game loop')
             while self.game_is_running:
 
                 # Handle events
@@ -108,7 +108,7 @@ class Game(object):
 
                     # If user quits
                     if event.type == pygame.QUIT or pygame.key.get_pressed()[pygame.K_ESCAPE]:
-                        if self.VERBOSE: print 'Gameplay stopped, returning to main menu'
+                        if self.VERBOSE: print('Gameplay stopped, returning to main menu')
                         return
 
                 '''
@@ -262,7 +262,7 @@ class Game(object):
                         enemy.rect.right = player.rect.left
                     elif player.prev_x < player.rect.x:
                         enemy.rect.left = player.rect.right
-                    if pygame.sprite.spritecollideany(enemy, level.objects, False) or pygame.sprite.spritecollideany(enemy, level.level_group, False):
+                    if pygame.sprite.spritecollideany(enemy, level.objects, None) or pygame.sprite.spritecollideany(enemy, level.level_group, None):
                         enemy.rect.x = enemy_prev_x
                         player.rect.x = player.prev_x
 
@@ -310,7 +310,7 @@ class Game(object):
                         if player.is_slamming:
                             if enemy.is_in_air:
                                 enemy.rect.top = player.rect.bottom
-                                if pygame.sprite.spritecollideany(enemy, level.level_group, False) or pygame.sprite.spritecollide(enemy, level.objects, False): enemy.kill_by_player()
+                                if pygame.sprite.spritecollideany(enemy, level.level_group, None) or pygame.sprite.spritecollide(enemy, level.objects, None): enemy.kill_by_player()
                             else: enemy.kill_by_player()
                         else:
                             player.rect.bottom = enemy.rect.top
@@ -377,13 +377,13 @@ class Game(object):
                 if player.rect.top > vertical_constraints[1] or player.health <= 0:
                     if player.lives <= 0:
                         player.kill()
-                        if self.VERBOSE: print 'Player died. Gameplay stopped, returning to main menu.'
+                        if self.VERBOSE: print('Player died. Gameplay stopped, returning to main menu.')
                         return
                     else:
                         player.lives -= 1
                         player.health = player.max_health
                         life_rects.pop()
-                        if self.VERBOSE: print 'Player died. %d lives remaining.' % player.lives
+                        if self.VERBOSE: print('Player died. %d lives remaining.') % player.lives
                         self.offset_sprites(level, horizontal_constraints, vertical_constraints, player, -self.total_offset_x, -self.total_offset_y)
                         player.rect.x = (screen_x / 2) - 75
                         player.rect.y = (screen_y / 2) - 75
@@ -426,7 +426,7 @@ class Game(object):
                 # Set frame rate
                 clock.tick(self.FPS)
 
-        if self.VERBOSE: print 'Gameplay stopped, returning to main menu'
+        if self.VERBOSE: print('Gameplay stopped, returning to main menu')
         return
 
     # Offset all sprites in the level
@@ -460,7 +460,7 @@ class Game(object):
             sprite.rect.y += offset_y
 
     def check_collide(self, sprite, group, dir):
-        collision = pygame.sprite.spritecollideany(sprite, group, False)
+        collision = pygame.sprite.spritecollideany(sprite, group, None)
         if collision:
             if dir == 'x':
                 if sprite.prev_x < collision.rect.centerx:

@@ -30,24 +30,24 @@ class Creator_Level_Selection:
         y_top = ((screen_y - 200) - ((rows * 120) - 30)) / 2
         count = 0
         for i in range(int(math.floor(len(levels) / (columns * rows)) + 1)):
-            if self.VERBOSE: print 'Generating page %s' % str(i)
+            if self.VERBOSE: print('Generating page %s') % str(i)
             page = pygame.sprite.Group()
             x = x_left
             y = y_top
             for _ in range(int(rows)):
                 for _ in range(int(columns)):
                     count += 1
-                    if self.VERBOSE: print 'Generating selection button for level %s' % str(count)
+                    if self.VERBOSE: print('Generating selection button for level %s') % str(count)
                     if count == len(levels) + 1:
                         page.add(Button([x, y], 90, 90, 'New', 36, screen))
                         break
                     else: page.add(Button([x, y], 90, 90, str(count), 50, screen))
-                    if self.VERBOSE: print 'Generated selection button for level %s' % str(count)
+                    if self.VERBOSE: print('Generated selection button for level %s') % str(count)
                     x += 120
                 if count == len(levels) + 1: break
                 y += 120
                 x = x_left
-            if self.VERBOSE: print 'Generated page %s' % str(i)
+            if self.VERBOSE: print('Generated page %s') % str(i)
             self.pages.append(page)
 
         self.back_button = Button([(screen_x / 2) - 190, screen_y - 145], 90, 90, 'Prev', 30, screen)
@@ -72,7 +72,7 @@ class Creator_Level_Selection:
 
         clock = pygame.time.Clock()
 
-        if self.VERBOSE: print 'Level selection screen initialized'
+        if self.VERBOSE: print('Level selection screen initialized')
 
         while self.creator_level_selection_screen_is_active:
 
@@ -81,20 +81,20 @@ class Creator_Level_Selection:
 
                 # If user quits
                 if event.type == pygame.QUIT or pygame.key.get_pressed()[pygame.K_ESCAPE]:
-                    if self.VERBOSE: print 'Level selection canceled, returning to main menu'
+                    if self.VERBOSE: print('Level selection canceled, returning to main menu')
                     return
 
             mouse_pos = pygame.mouse.get_pos()
 
             if self.back_button.check_click(mouse_pos[0], mouse_pos[1]):
-                if self.VERBOSE: print 'Switching to level selection page %s' % str(self.selected_page)
+                if self.VERBOSE: print('Switching to level selection page %s') % str(self.selected_page)
                 self.selected_page -= 1
                 if self.selected_page == 0: self.back_button.disabled = True
                 self.next_button.disabled = False
                 self.text = self.font.render('%s/%s' % (str(self.selected_page + 1), len(self.pages)), True, (0, 0, 0))
 
             if self.next_button.check_click(mouse_pos[0], mouse_pos[1]):
-                if self.VERBOSE: print 'Switching to level selection page %s' % str(self.selected_page + 2)
+                if self.VERBOSE: print('Switching to level selection page %s') % str(self.selected_page + 2)
                 self.selected_page += 1
                 if self.selected_page == len(self.pages) - 1: self.next_button.disabled = True
                 self.back_button.disabled = False
@@ -103,10 +103,10 @@ class Creator_Level_Selection:
             button = self.getClickedButton(mouse_pos)
             if button is not None:
                 if button.text == 'New':
-                    if self.VERBOSE: print 'Creating new level'
+                    if self.VERBOSE: print('Creating new level')
                     return Level_Creator(self.VERBOSE, self.SHOW_FPS).start(self.screen, None, None)
                 else:
-                    if self.VERBOSE: print 'Editing level %s' % button.text
+                    if self.VERBOSE: print('Editing level %s') % button.text
                     selected_level = int(button.text) - 1
                     return Level_Creator(self.VERBOSE, self.SHOW_FPS).start(self.screen, self.levels[selected_level], selected_level)
 
